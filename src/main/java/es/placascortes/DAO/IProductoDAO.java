@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package es.albarregas.DAO;
+package es.placascortes.DAO;
 
-import es.albarregas.beans.Carrito;
-import es.albarregas.beans.Producto;
+import es.placascortes.beans.Carrito;
+import es.placascortes.beans.Producto;
 import java.util.List;
 
 /**

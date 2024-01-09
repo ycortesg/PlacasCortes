@@ -2,11 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package es.albarregas.events;
+package es.placascortes.events;
 
-import es.albarregas.DAO.ICategoriaDAO;
-import es.albarregas.DAO.IProductoDAO;
-import es.albarregas.DAOFactory.DAOFactory;
+import es.placascortes.DAO.ICategoriaDAO;
+import es.placascortes.DAO.IProductoDAO;
+import es.placascortes.DAOFactory.DAOFactory;
+import es.placascortes.DAOFactory.MySQLDAOFactory;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.List;
@@ -22,7 +23,7 @@ public class Listener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         // Cuando se inicia la aplicación
-        DAOFactory daof = new DAOFactory();
+        DAOFactory daof = new MySQLDAOFactory();
         ICategoriaDAO cdao = daof.getCategoriaDAO();
         IProductoDAO pdao = daof.getProductoDAO();
         

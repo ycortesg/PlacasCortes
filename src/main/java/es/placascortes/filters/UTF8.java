@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package es.albarregas.filters;
+package es.placascortes.filters;
 
 import java.io.IOException;
 

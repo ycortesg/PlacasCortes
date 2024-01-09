@@ -17,7 +17,7 @@
         <script src="${applicationScope.javascript}registro.js" defer type="module"></script>
         <title>Registro</title>
     </head>
-    <body class="vh-100 d-flex align-items-center justify-content-center">
+    <body class="vh-100 d-flex align-items-center justify-content-center flex-column">
         <h1>Registro</h1>
 
         <form method="POST" action="RegistroController">

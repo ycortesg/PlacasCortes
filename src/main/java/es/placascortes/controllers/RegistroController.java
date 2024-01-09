@@ -2,17 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package es.albarregas.controllers;
+package es.placascortes.controllers;
 
-import es.albarregas.DAO.ILineaPedidoDAO;
-import es.albarregas.DAO.IPedidoDAO;
-import es.albarregas.DAO.IUsuarioDAO;
-import es.albarregas.DAOFactory.DAOFactory;
-import es.albarregas.beans.Carrito;
-import es.albarregas.beans.Usuario;
-import es.albarregas.utilities.Utilities;
+import es.placascortes.DAO.ILineaPedidoDAO;
+import es.placascortes.DAO.IPedidoDAO;
+import es.placascortes.DAO.IUsuarioDAO;
+import es.placascortes.DAOFactory.DAOFactory;
+import es.placascortes.DAOFactory.MySQLDAOFactory;
+import es.placascortes.beans.Carrito;
+import es.placascortes.beans.Usuario;
+import es.placascortes.utilities.Utilities;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class RegistroController extends HttpServlet {
                         BeanUtils.populate(usuario, request.getParameterMap());
                         usuario.setNIF(usuario.getNIF() + letraNIF);
 
-                        daof = new DAOFactory();
+                        daof = new MySQLDAOFactory();
                         udao = daof.getUsuarioDAO();
 
                         estadoRegistro = udao.registrarUsuario(usuario);

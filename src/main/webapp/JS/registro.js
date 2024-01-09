@@ -123,17 +123,17 @@ function checkInputsValidos() {
     botonEnvio.disabled = !(listaCamposValidos.every(e => e) && Array.from(document.querySelectorAll("input")).every(e => e.value !== ""));
 }
 
-inputNIF.addEventListener("keyup", () => {
+inputNIF.addEventListener("blur", () => {
     checkNIFInput();
     checkInputsValidos();
 });
 
-inputCodigoPostal.addEventListener("keyup", () => {
+inputCodigoPostal.addEventListener("blur", () => {
     checkCodigoPostalInput();
     checkInputsValidos();
 });
 
-inputEmail.addEventListener("keyup", () => {
+inputEmail.addEventListener("blur", () => {
     console.log(inputEmail.value);
     checkEmailInput();
     checkInputsValidos();

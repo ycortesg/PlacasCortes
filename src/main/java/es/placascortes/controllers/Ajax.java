@@ -2,20 +2,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
-package es.albarregas.controllers;
+package es.placascortes.controllers;
 
 import com.google.gson.Gson;
-import es.albarregas.DAO.ILineaPedidoDAO;
-import es.albarregas.DAO.IPedidoDAO;
-import es.albarregas.DAO.IProductoDAO;
-import es.albarregas.DAO.IUsuarioDAO;
-import es.albarregas.DAOFactory.DAOFactory;
-import es.albarregas.beans.Carrito;
-import es.albarregas.beans.Producto;
-import es.albarregas.beans.Usuario;
-import es.albarregas.utilities.Utilities;
+import es.placascortes.DAO.ILineaPedidoDAO;
+import es.placascortes.DAO.IPedidoDAO;
+import es.placascortes.DAO.IProductoDAO;
+import es.placascortes.DAO.IUsuarioDAO;
+import es.placascortes.DAOFactory.DAOFactory;
+import es.placascortes.DAOFactory.MySQLDAOFactory;
+import es.placascortes.beans.Carrito;
+import es.placascortes.beans.Producto;
+import es.placascortes.beans.Usuario;
+import es.placascortes.utilities.Utilities;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +71,7 @@ public class Ajax extends HttpServlet {
         Producto producto = null;
         Carrito carrito = null;
         
-        DAOFactory daof = new DAOFactory();
+        DAOFactory daof = new MySQLDAOFactory();
         String correoElectronico = null;
         Boolean correoValido = null;
         String aviso = null;
