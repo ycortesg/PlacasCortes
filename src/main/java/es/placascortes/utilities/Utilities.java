@@ -4,7 +4,8 @@
  */
 package es.placascortes.utilities;
 
-import es.placascortes.beans.Carrito;
+import es.placascortes.beans.LineaPedido;
+import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Producto;
 import es.placascortes.beans.Usuario;
 import java.io.Serializable;
@@ -40,81 +41,84 @@ public class Utilities implements Serializable {
         return !faltaAlgunValor;
     }
 
-    public static Short accionesCarrito(HttpSession sesion, Short idProducto, String accion) {
+    public static Byte accionesCarrito(HttpSession sesion, Short idProducto, String accion) {
         
-        List<Carrito> listadoCarrito = (List) sesion.getAttribute("carrito");
-        if (listadoCarrito == null) {
-            listadoCarrito = new ArrayList();
+        Pedido pedidoCarrito = (Pedido) sesion.getAttribute("carrito");
+        if (pedidoCarrito == null) {
+            pedidoCarrito = new Pedido();
+            pedidoCarrito.setListadoLineasPedido(new ArrayList<LineaPedido>());
         }
 
+        List<LineaPedido> listadoLineas = pedidoCarrito.getListadoLineasPedido();
         Boolean carritoASidoModificado = false;
-        Carrito carrito = null;
+        LineaPedido lineaPedido = null;
         Producto producto = null;
         Usuario usuario = null;
-        Short cantidadProducto = null;
-        for (Short i = 0; i < listadoCarrito.size(); i++) {
-            carrito = listadoCarrito.get(i);
-            if (carrito.getProducto().getIdProducto().equals(idProducto)) {
+        Byte cantidadProducto = null;
+        for (Short i = 0; i < listadoLineas.size(); i++) {
+            lineaPedido = listadoLineas.get(i);
+            if (lineaPedido.getProducto().getIdProducto().equals(idProducto)) {
                 switch (accion) {
                     case "anadirACarrito":
                         carritoASidoModificado = true;
-                        listadoCarrito.get(i).setCantidad((short) (carrito.getCantidad() + 1));
+                        listadoLineas.get(i).setCantidad((byte) (lineaPedido.getCantidad()+1));
 
                         break;
                     case "eliminarDeCarrito":
-                        if (listadoCarrito.get(i).getCantidad() > 0) {
+                        if (listadoLineas.get(i).getCantidad() > 0) {
                             carritoASidoModificado = true;
-                            listadoCarrito.get(i).setCantidad((short) (carrito.getCantidad() - 1));
+                            listadoLineas.get(i).setCantidad((byte) (lineaPedido.getCantidad()-1));
                         }
 
                         break;
                     case "eliminarDeCarritoEntero":
                         carritoASidoModificado = true;
-                        listadoCarrito.get(i).setCantidad((short) 0);
+                        listadoLineas.get(i).setCantidad((byte) 0);
 
                         break;
                 }
-                cantidadProducto = listadoCarrito.get(i).getCantidad();
+                cantidadProducto = listadoLineas.get(i).getCantidad();
             }
         }
         if (!carritoASidoModificado) {
-            carrito = new Carrito();
+            lineaPedido = new LineaPedido();
             producto = new Producto();
 
             producto.setIdProducto(idProducto);
 
-            carrito.setCantidad((short) 1);
-            carrito.setProducto(producto);
+            lineaPedido.setCantidad((byte) 1);
+            lineaPedido.setProducto(producto);
 
-            listadoCarrito.add(carrito);
+            listadoLineas.add(lineaPedido);
             cantidadProducto = 1;
         }
 
-        sesion.setAttribute("carrito", listadoCarrito);
+        pedidoCarrito.setListadoLineasPedido(listadoLineas);
+        sesion.setAttribute("carrito", pedidoCarrito);
         return cantidadProducto;
     }
 
-    public static Integer sumUnidadesCarrito(List<Carrito> listadoCarrito) {
+    public static Integer sumUnidadesCarrito(List<LineaPedido> listadoLineaPedido) {
         Integer sumUnidades = 0;
-        for (Carrito carrito : listadoCarrito) {
-            sumUnidades += carrito.getCantidad();
+        for (LineaPedido lineaPedido : listadoLineaPedido) {
+            sumUnidades += lineaPedido.getCantidad();
         }
         return sumUnidades;
     }
     
-    public static Float sumPreciosCarrito(List<Carrito> listadoCarrito) {
+    public static Float sumPreciosCarrito(List<LineaPedido> listadoLineaPedido) {
         Float sumPrecios = 0f;
-        for (Carrito carrito : listadoCarrito) {
-            sumPrecios += carrito.getCantidad() * carrito.getProducto().getPrecio();
+        for (LineaPedido lineaPedido : listadoLineaPedido) {
+            sumPrecios += lineaPedido.getCantidad() * lineaPedido.getProducto().getPrecio();
         }
         return sumPrecios;
     }
 
-    public static Short productoEnCarrito(List<Carrito> listadoCarrito, Short idCarrito) {
-        Short resultado = 0;
-        for (Integer i = 0; listadoCarrito != null && i < listadoCarrito.size() && resultado == 0; i++) {
-            if (listadoCarrito.get(i).getProducto().getIdProducto().equals(idCarrito) && listadoCarrito.get(i).getCantidad() != 0) {
-                resultado = listadoCarrito.get(i).getCantidad();
+    public static Byte productoEnCarrito(List<LineaPedido> listadoLineaPedido, Short idProducto) {
+        byte resultado = 0;
+        for (Integer i = 0; listadoLineaPedido != null && i < listadoLineaPedido.size() && resultado == 0; i++) {
+            if (listadoLineaPedido.get(i).getProducto().getIdProducto().equals(idProducto) && listadoLineaPedido.get(i).getCantidad() != 0) {
+                resultado = listadoLineaPedido.get(i).getCantidad();
             }
         }
         return resultado;
@@ -130,20 +134,22 @@ public class Utilities implements Serializable {
      */
     public static void crearCookie(HttpSession sesion, HttpServletResponse response) throws UnsupportedEncodingException {
         StringBuilder resultado = new StringBuilder();
-        List<Carrito> listadoCarrito = (List) sesion.getAttribute("carrito");
-
-        for (Integer i = 0; listadoCarrito != null && i < listadoCarrito.size(); i++) {
-            if (!listadoCarrito.get(i).getCantidad().equals((short) 0)) {
+        Pedido pedidoCarrito = (Pedido) sesion.getAttribute("carrito");
+        List<LineaPedido> listadoLineas = null;
+        if (pedidoCarrito != null) listadoLineas = pedidoCarrito.getListadoLineasPedido();
+        
+        for (Integer i = 0; pedidoCarrito != null && i < listadoLineas.size(); i++) {
+            if (!listadoLineas.get(i).getCantidad().equals(new Byte("0"))) {
                 if (i > 0) {
                     resultado.append("===");
                 }
-                resultado.append(listadoCarrito.get(i).getProducto().getIdProducto() + "-" + listadoCarrito.get(i).getCantidad());
+                resultado.append(listadoLineas.get(i).getProducto().getIdProducto() + "-" + listadoLineas.get(i).getCantidad());
             }
         }
 
         Cookie cookie = new Cookie("carritoPlacasCortes", resultado.toString());
 
-        cookie.setMaxAge(listadoCarrito == null || resultado.toString().isBlank() ? 0 : 172800);
+        cookie.setMaxAge(pedidoCarrito == null || resultado.toString().isBlank() ? 0 : 172800);
         response.addCookie(cookie);
     }
 
@@ -157,9 +163,10 @@ public class Utilities implements Serializable {
     public static void leerCoockie(HttpSession sesion, HttpServletRequest request) throws UnsupportedEncodingException {
         Cookie cookie = null;
         Cookie[] cookies = request.getCookies();
-        List<Carrito> listadoCarrito = null;
+        List<LineaPedido> listadoLineaPedido = null;
         Producto producto = null;
-        Carrito carrito = null;
+        Pedido pedidoCarrito = null;
+        LineaPedido lineaPedido = null;
         String decodedCoockieList;
         String[] carritoArr = null;
         if (cookies != null) {
@@ -171,26 +178,27 @@ public class Utilities implements Serializable {
         }
         if (cookie != null) {
             decodedCoockieList = URLDecoder.decode(cookie.getValue(), "UTF-8");
-            listadoCarrito = new ArrayList();
+            listadoLineaPedido = new ArrayList();
             for (String carritoStr : decodedCoockieList.split("===")) {
                 if (!carritoStr.isBlank()) {
                     carritoArr = carritoStr.split("-");
 
                     producto = new Producto();
-                    carrito = new Carrito();
+                    lineaPedido = new LineaPedido();
 
                     producto.setIdProducto(Short.parseShort(carritoArr[0]));
-                    carrito.setCantidad(Short.parseShort(carritoArr[1]));
+                    lineaPedido.setCantidad(Byte.parseByte(carritoArr[1]));
 
-                    carrito.setProducto(producto);
-                    if (carrito.getCantidad() > 0) {
-                        listadoCarrito.add(carrito);
+                    lineaPedido.setProducto(producto);
+                    if (lineaPedido.getCantidad() > 0) {
+                        listadoLineaPedido.add(lineaPedido);
                     }
 
                 }
-
             }
-            sesion.setAttribute("carrito", listadoCarrito);
+            pedidoCarrito = new Pedido();
+            pedidoCarrito.setListadoLineasPedido(listadoLineaPedido);
+            sesion.setAttribute("carrito", pedidoCarrito);
         }
     }
 
@@ -201,8 +209,8 @@ public class Utilities implements Serializable {
      * @return
      */
     public static Boolean carritoEstaEnSesion(HttpSession sesion) {
-        List<Carrito> listado = (List) sesion.getAttribute("carrito");
-        return listado != null;
+        Pedido pedidoCarrito = (Pedido) sesion.getAttribute("carrito");
+        return pedidoCarrito != null;
     }
 
     /**

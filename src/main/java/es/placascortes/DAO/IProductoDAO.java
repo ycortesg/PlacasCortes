@@ -4,7 +4,7 @@
  */
 package es.placascortes.DAO;
 
-import es.placascortes.beans.Carrito;
+import es.placascortes.beans.LineaPedido;
 import es.placascortes.beans.Producto;
 import java.util.List;
 
@@ -17,6 +17,6 @@ public interface IProductoDAO {
     public List<Producto> getProductosEscaparate();
     public List<Producto> getProductosFiltrados(String listaFiltros[][]);
     public Producto getProductoDetallesPorId(Short id);
-    public List<Producto> getDetallesCarrito(List<Carrito> listaCarrito);
+    public List<Producto> getDetallesCarrito(List<LineaPedido> listadoListaPedido);
     public void closeConnection();
 }

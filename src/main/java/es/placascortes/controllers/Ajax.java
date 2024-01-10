@@ -11,11 +11,13 @@ import es.placascortes.DAO.IProductoDAO;
 import es.placascortes.DAO.IUsuarioDAO;
 import es.placascortes.DAOFactory.DAOFactory;
 import es.placascortes.DAOFactory.MySQLDAOFactory;
-import es.placascortes.beans.Carrito;
+import es.placascortes.beans.LineaPedido;
+import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Producto;
 import es.placascortes.beans.Usuario;
 import es.placascortes.utilities.Utilities;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -65,11 +67,11 @@ public class Ajax extends HttpServlet {
         JSONObject objeto = null;
         JSONArray arrayJSON = null;
         List listadoProdusctosFiltrados = null;
-        List listadoCarrito = null;
 
         Usuario usuario = null;
         Producto producto = null;
-        Carrito carrito = null;
+        Pedido pedido = null;
+        LineaPedido lineaPedido = null;
 
         DAOFactory daof = new MySQLDAOFactory();
         String correoElectronico = null;
@@ -77,8 +79,10 @@ public class Ajax extends HttpServlet {
         String aviso = null;
         Gson g = null;
 
+        
+        Byte cantidadProductoEnCarrito = null;
+        
         Short estado = null;
-        Short cantidadProductoEnCarrito = null;
         Short idPedido = null;
 
         Integer productosEnCarrito = null;
@@ -89,7 +93,7 @@ public class Ajax extends HttpServlet {
         Short idProducto = null;
         List retornoObj = null;
         Iterator<Producto> iteratorProducto = null;
-        Iterator<Carrito> iteratorCarrito = null;
+        Iterator<LineaPedido> iteratorLineaPedido = null;
         HttpSession sesion = null;
 
         IUsuarioDAO udao = null;
@@ -171,13 +175,18 @@ public class Ajax extends HttpServlet {
                 if (!Utilities.carritoEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)) {
                     Utilities.leerCoockie(sesion, request);
                 }
+                pedido = (Pedido) sesion.getAttribute("carrito");
 
+                if (pedido == null) {
+                    pedido = new Pedido();
+                    pedido.setListadoLineasPedido(new ArrayList());
+                }
+                
                 cantidadProductoEnCarrito = Utilities.accionesCarrito(
                         sesion,
                         idProducto,
                         accionesACarritoArr[1]);
-                productosEnCarrito = Utilities.sumUnidadesCarrito((List<Carrito>) sesion.getAttribute("carrito"));
-                sesion.setAttribute("sumaProductosEnCarrito", productosEnCarrito);
+                productosEnCarrito = Utilities.sumUnidadesCarrito(pedido.getListadoLineasPedido());
 
                 if (Utilities.usuarioEstaEnSesion(sesion)) {
                     usuario = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
@@ -224,11 +233,17 @@ public class Ajax extends HttpServlet {
                 if (!Utilities.usuarioEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)) {
                     Utilities.leerCoockie(sesion, request);
                 }
+                pedido = (Pedido) sesion.getAttribute("carrito");
 
+                if (pedido == null) {
+                    pedido = new Pedido();
+                    pedido.setListadoLineasPedido(new ArrayList());
+                }
+                
                 objeto = new JSONObject();
                 objeto.put("cantidadProductoEnCarrito",
                         Utilities.productoEnCarrito(
-                                (List<Carrito>) request.getSession().getAttribute("carrito"),
+                                pedido.getListadoLineasPedido(),
                                 idProducto));
 
                 // mandamos el objeto
@@ -236,21 +251,22 @@ public class Ajax extends HttpServlet {
                 response.getWriter().print(objeto);
                 break;
             case "carritoFactura":
-                listadoCarrito = (List) request.getSession().getAttribute("carrito");
+                pedido = (Pedido) request.getSession().getAttribute("carrito");
+                
 
-                precioTotalSinIVA = Utilities.sumPreciosCarrito(listadoCarrito);
+                precioTotalSinIVA = Utilities.sumPreciosCarrito(pedido.getListadoLineasPedido());
                 precioTotalConIVA = precioTotalSinIVA * 1.21f;
                 diferenciaDeIVA = precioTotalSinIVA * .21f;
 
                 arrayJSON = new JSONArray();
-                iteratorCarrito = listadoCarrito.iterator();
-                while (iteratorCarrito.hasNext()) {
-                    carrito = iteratorCarrito.next();
+                iteratorLineaPedido = pedido.getListadoLineasPedido().iterator();
+                while (iteratorLineaPedido.hasNext()) {
+                    lineaPedido = iteratorLineaPedido.next();
 
                     objeto = new JSONObject();
-                    objeto.put("nombre", carrito.getProducto().getNombre());
-                    objeto.put("precio", carrito.getProducto().getPrecio());
-                    objeto.put("cantidad", carrito.getCantidad());
+                    objeto.put("nombre", lineaPedido.getProducto().getNombre());
+                    objeto.put("precio", lineaPedido.getProducto().getPrecio());
+                    objeto.put("cantidad", lineaPedido.getCantidad());
 
                     arrayJSON.add(objeto);
                 }

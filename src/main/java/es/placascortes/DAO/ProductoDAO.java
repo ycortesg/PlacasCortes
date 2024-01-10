@@ -4,8 +4,8 @@
  */
 package es.placascortes.DAO;
 
-import es.placascortes.beans.Carrito;
 import es.placascortes.beans.Categoria;
+import es.placascortes.beans.LineaPedido;
 import es.placascortes.beans.Producto;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -205,7 +205,7 @@ public class ProductoDAO implements IProductoDAO {
     }
 
     @Override
-    public List<Producto> getDetallesCarrito(List<Carrito> listaCarrito) {
+    public List<Producto> getDetallesCarrito(List<LineaPedido> listadoListaPedido) {
         ResultSet resultado = null;
         Producto producto = null;
         Categoria categoria = null;
@@ -217,9 +217,9 @@ public class ProductoDAO implements IProductoDAO {
 
         listaProductos.append(sql);
         listaProductos.append("where productos.idProducto in (");
-        for (Integer i = 0 ; i<listaCarrito.size() ; i++){
+        for (Integer i = 0 ; i<listadoListaPedido.size() ; i++){
             if (i > 0) listaProductos.append(",");
-            listaProductos.append(listaCarrito.get(i).getProducto().getIdProducto());
+            listaProductos.append(listadoListaPedido.get(i).getProducto().getIdProducto());
         }
         listaProductos.append(")");
         

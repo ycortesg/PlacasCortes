@@ -5,7 +5,7 @@
     <img src="${applicationScope.imagenes}LOGOS/logo.png" alt="logo" class="logo">
 
         <c:if test="${param.hayCuentaEnSession}">
-            <b class="fs-3">Bienvenid@ &nbsp;&nbsp;&nbsp;<u>${sessionScope.usuarioEnSesion.nombre}</u></b>
+            <b class="fs-3">Bienvenid@ &nbsp;&nbsp;&nbsp;<u>${sessionScope.usuarioEnSesion.nombre}</u>!!</b>
         </c:if>
         <form method="POST" action="FrontController" class="d-flex align-items-center justify-content-center gap-3">
             <div>                
@@ -35,7 +35,7 @@
                         <c:choose>
                             <c:when test="${param.hayCuentaEnSession}">
                                 <c:if test="${sessionScope.carrito != null}">
-                                    <c:forEach var="carrito" items="${sessionScope.carrito}">
+                                    <c:forEach var="carrito" items="${sessionScope.carrito.listadoLineasPedido}">
                                         <fmt:parseNumber var="cantidadProducto" value="${carrito.cantidad}"  type="number" integerOnly="true"></fmt:parseNumber>
                                         <fmt:parseNumber var="productosEnCarrito" value="${productosEnCarrito + cantidadProducto}"></fmt:parseNumber>
                                     </c:forEach>

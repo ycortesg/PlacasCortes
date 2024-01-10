@@ -73,7 +73,7 @@ public class Pedido implements Serializable{
         this.iva = iva;
     }
 
-    public List getListadoLineasPedido() {
+    public List<LineaPedido> getListadoLineasPedido() {
         return listadoLineasPedido;
     }
 

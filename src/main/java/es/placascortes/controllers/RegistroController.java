@@ -9,7 +9,7 @@ import es.placascortes.DAO.IPedidoDAO;
 import es.placascortes.DAO.IUsuarioDAO;
 import es.placascortes.DAOFactory.DAOFactory;
 import es.placascortes.DAOFactory.MySQLDAOFactory;
-import es.placascortes.beans.Carrito;
+import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Usuario;
 import es.placascortes.utilities.Utilities;
 import java.io.IOException;
@@ -66,7 +66,7 @@ public class RegistroController extends HttpServlet {
         IPedidoDAO pedao = null;
         ILineaPedidoDAO lpdao = null;
         Usuario usuario = null;
-        List<Carrito> listadoCarrito = null;
+        Pedido pedido = null;
         Short estadoRegistro = null;
         Short idPedidoGenerado = null;
 
@@ -90,26 +90,25 @@ public class RegistroController extends HttpServlet {
                         if (!Utilities.carritoEstaEnSesion(request.getSession())) {
                             Utilities.leerCoockie(request.getSession(), request);
                         }
-                        urlDispatcher = "index.jsp";
 
                         pedao = daof.getPedidoDAO();
                         lpdao = daof.getLineaPedidoDAO();
                         
-                        listadoCarrito = (List) request.getSession().getAttribute("carrito");
+                        pedido = (Pedido) request.getSession().getAttribute("carrito");
                         
-                        if (listadoCarrito == null) {
-                            listadoCarrito = new ArrayList<>();
+                        if (pedido == null) {
+                            pedido = new Pedido();
+                            pedido.setListadoLineasPedido(new ArrayList());
                         }
                         
                         usuario.setIdUsuario((short) (estadoRegistro * -1));
 
                         idPedidoGenerado = pedao.crearPedido(usuario.getIdUsuario());
-                        lpdao.crearLineasPedido(listadoCarrito, idPedidoGenerado);
+                        lpdao.crearLineasPedido(pedido, idPedidoGenerado);
                         
-                        if (Utilities.carritoEstaEnSesion(request.getSession())) {
-                            request.getSession().removeAttribute("carrito");
-                        }
+                        request.getSession().removeAttribute("carrito");
                         Utilities.eliminarCookie(response);
+                        urlDispatcher = "index.jsp";
 
                     } catch (IllegalAccessException | InvocationTargetException ex) {
                         request.setAttribute("aviso", "Ha ocurrido algun error");

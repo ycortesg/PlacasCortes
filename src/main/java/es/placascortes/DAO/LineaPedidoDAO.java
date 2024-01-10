@@ -4,14 +4,15 @@
  */
 package es.placascortes.DAO;
 
-import es.placascortes.beans.Carrito;
+import es.placascortes.beans.LineaPedido;
+import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Producto;
+import es.placascortes.beans.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -20,7 +21,7 @@ import java.util.List;
 public class LineaPedidoDAO implements ILineaPedidoDAO {
 
     @Override
-    public void crearLineasPedido(List<Carrito> listadoCarrito, Short idPedido) {
+    public void crearLineasPedido(Pedido pedidoCarrito, Short idPedido) {
         PreparedStatement sentenciaPreparada = null;
         String sql = "insert into lineaspedidos (idPedido, idProducto, cantidad) values (?, ?, ?)";
 
@@ -28,12 +29,12 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
             Connection conexion = ConnectionFactory.getConnection();
             conexion.setAutoCommit(false);
 
-            for (Carrito carrito : listadoCarrito) {
+            for (LineaPedido lineaPedido : pedidoCarrito.getListadoLineasPedido()) {
                 sentenciaPreparada = conexion.prepareStatement(sql);
 
                 sentenciaPreparada.setShort(1, idPedido);
-                sentenciaPreparada.setShort(2, carrito.getProducto().getIdProducto());
-                sentenciaPreparada.setByte(3, Byte.parseByte(carrito.getCantidad().toString()));
+                sentenciaPreparada.setShort(2, lineaPedido.getProducto().getIdProducto());
+                sentenciaPreparada.setByte(3, Byte.parseByte(lineaPedido.getCantidad().toString()));
 
                 sentenciaPreparada.executeUpdate();
             }
@@ -48,13 +49,14 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
     }
 
     @Override
-    public List<Carrito> crearCarritoDeLineasPedido(Short idUsuario) {
+    public Pedido crearCarritoDeLineasPedido(Short idUsuario) {
         ResultSet resultado = null;
 
         PreparedStatement sentenciaPreparada = null;
         String sql = "select lineaspedidos.idProducto, lineaspedidos.cantidad from lineaspedidos inner join pedidos on lineaspedidos.idPedido = pedidos.idPedido where pedidos.idUsuario = ?  and pedidos.estado = \'c\'";
-        List<Carrito> listadoCarrito = null;
-        Carrito carrito = null;
+        Pedido pedidoCarrito = null;
+        Usuario usuario = null;
+        LineaPedido lineaPedido = null;
         Producto producto = null;
         try {
             // creamos conexion y sentencia
@@ -66,17 +68,23 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
 
             // Recogemos el resultado
             resultado = sentenciaPreparada.executeQuery();
-            listadoCarrito = new ArrayList<>();
+            pedidoCarrito = new Pedido();
+            pedidoCarrito.setListadoLineasPedido(new ArrayList<>());
+            
+            usuario = new Usuario();
+            usuario.setIdUsuario(idUsuario);
+            
+            pedidoCarrito.setUsuario(usuario);
             while (resultado.next()) {
-                carrito = new Carrito();
+                lineaPedido = new LineaPedido();
                 producto = new Producto();
 
                 producto.setIdProducto(resultado.getShort("idProducto"));
-                carrito.setCantidad((short) resultado.getByte("cantidad"));
+                lineaPedido.setCantidad(resultado.getByte("cantidad"));
 
-                carrito.setProducto(producto);
+                lineaPedido.setProducto(producto);
 
-                listadoCarrito.add(carrito);
+                pedidoCarrito.getListadoLineasPedido().add(lineaPedido);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -84,12 +92,11 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
             this.closeConnection();
         }
 
-        return listadoCarrito;
+        return pedidoCarrito;
     }
 
     @Override
-    public void actualizarLinea(Short idPedido, Short cantidad, Short idProducto) {
-        ResultSet resultado = null;
+    public void actualizarLinea(Short idPedido, Byte cantidad, Short idProducto) {
 
         PreparedStatement sentenciaPreparada = null;
         String sql = "update lineaspedidos set cantidad = ? where  idPedido = ? and idProducto = ?";
@@ -100,7 +107,7 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
             conexion.setAutoCommit(false);
             sentenciaPreparada = conexion.prepareStatement(sql);
 
-            sentenciaPreparada.setByte(1, Byte.parseByte(cantidad.toString()));
+            sentenciaPreparada.setByte(1, cantidad);
             sentenciaPreparada.setShort(2, idPedido);
             sentenciaPreparada.setShort(3, idProducto);
 
@@ -114,7 +121,7 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
     }
 
     @Override
-    public void insertarLinea(Short idPedido, Short cantidad, Short idProducto) {
+    public void insertarLinea(Short idPedido, Byte cantidad, Short idProducto) {
         ResultSet resultado = null;
 
         PreparedStatement sentenciaPreparada = null;
@@ -128,7 +135,7 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
 
             sentenciaPreparada.setShort(1, idPedido);
             sentenciaPreparada.setShort(2, idProducto);
-            sentenciaPreparada.setByte(3, Byte.parseByte(cantidad.toString()));
+            sentenciaPreparada.setByte(3, cantidad);
 
             sentenciaPreparada.executeUpdate();
             conexion.commit();

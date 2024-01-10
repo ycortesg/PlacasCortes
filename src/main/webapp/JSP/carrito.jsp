@@ -55,7 +55,7 @@
         <h1>Carrito</h1>
         <div class="w-75 h-75 overflow-auto d-flex justify-content-center align-items-start flex-column">
             <fmt:parseNumber var="productosEnCarrito" value="0" type="number" integerOnly="true"></fmt:parseNumber>
-            <c:forEach var="carrito" items="${sessionScope.carrito}">
+            <c:forEach var="carrito" items="${sessionScope.carrito.listadoLineasPedido}">
                 <fmt:parseNumber var="cantidadProducto" value="${carrito.cantidad}"  type="number" integerOnly="true"></fmt:parseNumber>
                 <fmt:parseNumber var="productosEnCarrito" value="${productosEnCarrito + cantidadProducto}"></fmt:parseNumber>
                 <c:if test="${carrito.cantidad > 0}">

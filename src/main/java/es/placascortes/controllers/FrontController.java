@@ -10,7 +10,8 @@ import es.placascortes.DAO.IUsuarioDAO;
 import es.placascortes.DAO.LineaPedidoDAO;
 import es.placascortes.DAOFactory.DAOFactory;
 import es.placascortes.DAOFactory.MySQLDAOFactory;
-import es.placascortes.beans.Carrito;
+import es.placascortes.beans.LineaPedido;
+import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Producto;
 import es.placascortes.beans.Usuario;
 import es.placascortes.utilities.Utilities;
@@ -61,9 +62,9 @@ public class FrontController extends HttpServlet {
         // Declaramos variables
         String urlDispatcher = null;
         String opcion = request.getParameter("opcion");
-        List<Carrito> listadoCarrito = null;
         List<Producto> listadoProducto = null;
         Usuario usuario = null;
+        Pedido pedido = null;
         Boolean actualizado = null;
         DAOFactory daof = null;
         IProductoDAO pdao = null;
@@ -86,9 +87,9 @@ public class FrontController extends HttpServlet {
                             request.getSession().setAttribute("usuarioEnSesion", usuario);
                             
                             lpdao = new LineaPedidoDAO();
-                            listadoCarrito = lpdao.crearCarritoDeLineasPedido(usuario.getIdUsuario());
+                            pedido = lpdao.crearCarritoDeLineasPedido(usuario.getIdUsuario());
                             
-                            request.getSession().setAttribute("carrito", listadoCarrito);
+                            request.getSession().setAttribute("carrito", pedido);
                         }
                     } catch (IllegalAccessException | InvocationTargetException ex) {
                         Logger.getLogger(FrontController.class.getName()).log(Level.SEVERE, null, ex);
@@ -114,18 +115,18 @@ public class FrontController extends HttpServlet {
                 if (Utilities.carritoEstaEnSesion(request.getSession())) {
                     daof = new MySQLDAOFactory();
                     pdao = daof.getProductoDAO();
-                    listadoCarrito = (List) request.getSession().getAttribute("carrito");
-                    listadoProducto = pdao.getDetallesCarrito(listadoCarrito);
-                    for (Integer i = 0; i < listadoCarrito.size(); i++) {
+                    pedido = (Pedido) request.getSession().getAttribute("carrito");
+                    listadoProducto = pdao.getDetallesCarrito(pedido.getListadoLineasPedido());
+                    for (Integer i = 0; i < pedido.getListadoLineasPedido().size(); i++) {
                         actualizado = false;
                         for (Integer j = 0; j < listadoProducto.size() && !actualizado; j++) {
-                            if (listadoProducto.get(j).getIdProducto().equals(listadoCarrito.get(i).getProducto().getIdProducto())) {
+                            if (listadoProducto.get(j).getIdProducto().equals(pedido.getListadoLineasPedido().get(i).getProducto().getIdProducto())) {
                                 actualizado = true;
-                                listadoCarrito.get(i).setProducto(listadoProducto.get(j));
+                                pedido.getListadoLineasPedido().get(i).setProducto(listadoProducto.get(j));
                             }
                         }
                     }
-                    request.setAttribute("carrito", listadoCarrito);
+                    request.setAttribute("carrito", pedido);
                 }
                 urlDispatcher = "JSP/carrito.jsp";
                 break;
