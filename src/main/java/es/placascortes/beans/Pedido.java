@@ -6,6 +6,7 @@ package es.placascortes.beans;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -22,6 +23,7 @@ public class Pedido implements Serializable{
     private Usuario usuario;
     private Float importe;
     private Float iva;
+    private List<LineaPedido> listadoLineasPedido;
 
     public Short getIdPedido() {
         return idPedido;
@@ -70,5 +72,12 @@ public class Pedido implements Serializable{
     public void setIva(Float iva) {
         this.iva = iva;
     }
-    
+
+    public List getListadoLineasPedido() {
+        return listadoLineasPedido;
+    }
+
+    public void setListadoLineasPedido(List listadoLineasPedido) {
+        this.listadoLineasPedido = listadoLineasPedido;
+    }
 }

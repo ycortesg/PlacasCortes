@@ -123,12 +123,12 @@ function checkInputsValidos() {
     botonEnvio.disabled = !(listaCamposValidos.every(e => e) && Array.from(document.querySelectorAll("input")).every(e => e.value !== ""));
 }
 
-inputNIF.addEventListener("blur", () => {
+inputNIF.addEventListener("keyup", () => {
     checkNIFInput();
     checkInputsValidos();
 });
 
-inputCodigoPostal.addEventListener("blur", () => {
+inputCodigoPostal.addEventListener("keyup", () => {
     checkCodigoPostalInput();
     checkInputsValidos();
 });

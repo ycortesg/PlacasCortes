@@ -78,7 +78,6 @@ document.querySelectorAll("section")
             e.querySelectorAll("button")
                     .forEach((boton) => {
                         boton.addEventListener("click", () => {
-//                            console.log(e.id, boton.id)
                             manejoCarrito(e.id, boton.id, e.querySelector("div#cantidadProducto b"), e);
                         });
                     });
@@ -93,10 +92,10 @@ botonFacturaModal.addEventListener("click", () => {
 
         request.onreadystatechange = (e) => {
             if (request.readyState === 4 && request.status === 200) {
-                botonFinalizarCompra.type = "button";
                 let respuesta = JSON.parse(e.currentTarget.responseText);
-                console.log(respuesta);
 
+                botonFinalizarCompra.type = "button";
+                botonFinalizarCompra.innerText = "Finalizar compra";
                 limpiarTabla();
                 respuesta.listadoCarrito.forEach((e, indx) => {
                     anadirProductoFactura(e.nombre, e.precio, e.cantidad, indx);

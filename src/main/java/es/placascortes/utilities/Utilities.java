@@ -41,6 +41,7 @@ public class Utilities implements Serializable {
     }
 
     public static Short accionesCarrito(HttpSession sesion, Short idProducto, String accion) {
+        
         List<Carrito> listadoCarrito = (List) sesion.getAttribute("carrito");
         if (listadoCarrito == null) {
             listadoCarrito = new ArrayList();

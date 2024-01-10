@@ -4,6 +4,9 @@
 <header class="d-flex align-items-center justify-content-between w-75 py-3 " >
     <img src="${applicationScope.imagenes}LOGOS/logo.png" alt="logo" class="logo">
 
+        <c:if test="${param.hayCuentaEnSession}">
+            <b class="fs-3">Bienvenid@ &nbsp;&nbsp;&nbsp;<u>${sessionScope.usuarioEnSesion.nombre}</u></b>
+        </c:if>
         <form method="POST" action="FrontController" class="d-flex align-items-center justify-content-center gap-3">
             <div>                
                 <c:choose>

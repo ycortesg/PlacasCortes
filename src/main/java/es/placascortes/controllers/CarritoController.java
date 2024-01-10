@@ -73,7 +73,7 @@ public class CarritoController extends HttpServlet {
                 break;
             case "finalizarCompra":
                 sesion = request.getSession();
-                if (Utilities.usuarioEstaEnSesion(sesion) ) {
+                if (Utilities.usuarioEstaEnSesion(sesion) && Utilities.carritoEstaEnSesion(sesion)) {
                     try {
                         daof = new MySQLDAOFactory();
                         pedao = daof.getPedidoDAO();
@@ -86,9 +86,7 @@ public class CarritoController extends HttpServlet {
                         pedido.setFecha(new Date());
                         
                         pedao.finalizarPedido(pedido);
-                        if (Utilities.carritoEstaEnSesion(sesion)){
-                            sesion.removeAttribute("carrito");
-                        }
+                        sesion.removeAttribute("carrito");
                         
                     } catch (IllegalAccessException | InvocationTargetException ex) {
                         request.setAttribute("aviso", "Ha ocurrido algun error");
