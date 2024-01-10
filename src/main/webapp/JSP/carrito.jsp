@@ -20,9 +20,44 @@
         <title>Carrito</title>
     </head>
     <body class="d-flex justify-content-start align-items-center vh-100 flex-column gap-3">
+        <div class="modal fade top-100 overflow-visible" id="facturaModal" tabindex="-1" aria-labelledby="facturaModalLabel" aria-hidden="true">
+            <div class="modal-dialog position-relative overflow-visible">
+                <div class="modal-content position-absolute bottom-0" id="modalFacturaModal">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="facturaModalLabel">Factura</h5>
+                        <!--<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>-->
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped" id="tablaFactura">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Precio</th>
+                                    <th scope="col">Unidades</th>
+                                    <th scope="col">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                        <form method="POST" action="CarritoController">
+                            <input type="hidden" id="importe" name="importe">
+                            <input type="hidden" id="iva" name="iva">
+                            <button id="finalizarCompra" type="button" value="finalizarCompra" name="opcion" class="btn btn-primary">Finalizar compra</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">Cancelar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <h1>Carrito</h1>
         <div class="w-75 h-75 overflow-auto d-flex justify-content-center align-items-start flex-column">
+            <fmt:parseNumber var="productosEnCarrito" value="0" type="number" integerOnly="true"></fmt:parseNumber>
             <c:forEach var="carrito" items="${sessionScope.carrito}">
+                <fmt:parseNumber var="cantidadProducto" value="${carrito.cantidad}"  type="number" integerOnly="true"></fmt:parseNumber>
+                <fmt:parseNumber var="productosEnCarrito" value="${productosEnCarrito + cantidadProducto}"></fmt:parseNumber>
                 <c:if test="${carrito.cantidad > 0}">
                     <c:set var="id" value="id=\"${carrito.producto.idProducto}\""></c:set>
                     <section class="w-100 d-flex justify-content-between align-items-center shadow-lg" ${id} >
@@ -50,15 +85,19 @@
                     </section>
                 </c:if>
             </c:forEach>
-
         </div>
-        <form method="POST" action="CarritoController">
+
+        <form method="POST" action="CarritoController" class="d-flex align-items-center justify-content-center">
             <c:choose>
                 <c:when test="${sessionScope.usuarioEnSesion == null}">
                     <button type="submit" name="opcion" value="registrate" class="btn btn-primary">Registrate</button>
                 </c:when>
                 <c:otherwise>
-                    <button type="submit" name="opcion" value="finalizarCompra" class="btn btn-primary">Finalizar compra</button>
+                    <c:set var="modalHabilitado" value="data-bs-target=\'#facturaModal\'"></c:set>
+                    <c:if test="${productosEnCarrito == 0}">
+                        <c:set var="modalHabilitado" value="disabled"></c:set>
+                    </c:if>
+                    <button id="botonFacturaModal" type="button" data-bs-toggle="modal" ${modalHabilitado} class="bg-light p-2 rounded-4 border-login px-3 shadow-sm">Finalizar compra</button>
                 </c:otherwise>
             </c:choose>
             <button type="submit" name="opcion" value="volver" class="btn btn-primary">Volver</button>

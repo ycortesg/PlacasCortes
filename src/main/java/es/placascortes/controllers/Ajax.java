@@ -59,53 +59,58 @@ public class Ajax extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         Map map = request.getParameterMap();
         String accion = request.getParameter("accion");
         JSONObject objeto = null;
         JSONArray arrayJSON = null;
         List listadoProdusctosFiltrados = null;
         List listadoCarrito = null;
-        
+
         Usuario usuario = null;
         Producto producto = null;
         Carrito carrito = null;
-        
+
         DAOFactory daof = new MySQLDAOFactory();
         String correoElectronico = null;
         Boolean correoValido = null;
         String aviso = null;
         Gson g = null;
-        
+
         Short estado = null;
         Short cantidadProductoEnCarrito = null;
         Short idPedido = null;
-        
+
         Integer productosEnCarrito = null;
+        Float precioTotalSinIVA = null;
+        Float precioTotalConIVA = null;
+        Float diferenciaDeIVA = null;
+
         Short idProducto = null;
         List retornoObj = null;
-        Iterator<Producto> iterator = null;
+        Iterator<Producto> iteratorProducto = null;
+        Iterator<Carrito> iteratorCarrito = null;
         HttpSession sesion = null;
 
         IUsuarioDAO udao = null;
         IProductoDAO pdao = null;
         IPedidoDAO pedao = null;
         ILineaPedidoDAO pldao = null;
-        
+
         switch (accion) {
             case "buscador":
                 g = new Gson();
                 String[][] buscadorArr = g.fromJson(request.getParameter("arreglo"), String[][].class);
-                
+
                 arrayJSON = new JSONArray();
-                
+
                 pdao = daof.getProductoDAO();
                 listadoProdusctosFiltrados = pdao.getProductosFiltrados(buscadorArr);
-                
-                iterator = listadoProdusctosFiltrados.iterator();
-                while(iterator.hasNext()){
-                    producto = iterator.next();
-                    
+
+                iteratorProducto = listadoProdusctosFiltrados.iterator();
+                while (iteratorProducto.hasNext()) {
+                    producto = iteratorProducto.next();
+
                     // creamos un objeto json para devolverlo al ajax con el aviso que tiene que mostrar
                     objeto = new JSONObject();
                     objeto.put("idProducto", producto.getIdProducto());
@@ -114,7 +119,7 @@ public class Ajax extends HttpServlet {
                     objeto.put("marca", producto.getMarca());
                     objeto.put("imagenProducto", producto.getImagen());
                     objeto.put("imagenCategoria", producto.getCategoria().getImagen());
-                    
+
                     arrayJSON.add(objeto);
                 }
 
@@ -125,10 +130,10 @@ public class Ajax extends HttpServlet {
             case "detallesProducto":
                 g = new Gson();
                 idProducto = g.fromJson(request.getParameter("arreglo"), Short.class);
-                
+
                 pdao = daof.getProductoDAO();
                 producto = pdao.getProductoDetallesPorId(idProducto);
-                
+
                 objeto = new JSONObject();
                 objeto.put("nombreProducto", producto.getNombre());
                 objeto.put("precio", producto.getPrecio());
@@ -137,7 +142,7 @@ public class Ajax extends HttpServlet {
                 objeto.put("imagenProducto", producto.getImagen());
                 objeto.put("imagenCategoria", producto.getCategoria().getImagen());
                 objeto.put("nombreCategoria", producto.getCategoria().getNombre());
-                
+
                 // mandamos el json
                 response.setContentType("application/text");
                 response.getWriter().print(objeto);
@@ -145,13 +150,13 @@ public class Ajax extends HttpServlet {
             case "correoExistente":
                 g = new Gson();
                 correoElectronico = g.fromJson(request.getParameter("arreglo"), String.class);
-                
+
                 udao = daof.getUsuarioDAO();
                 correoValido = udao.correoEsValido(correoElectronico);
-                
+
                 objeto = new JSONObject();
                 objeto.put("correoValido", correoValido);
-                
+
                 // mandamos el objeto
                 response.setContentType("application/text");
                 response.getWriter().print(objeto);
@@ -159,37 +164,49 @@ public class Ajax extends HttpServlet {
             case "carritoAjax":
                 g = new Gson();
                 String[] accionesACarritoArr = g.fromJson(request.getParameter("arreglo"), String[].class);
-                
+
                 idProducto = Short.parseShort(accionesACarritoArr[0]);
                 sesion = request.getSession();
-                
-                if(!Utilities.carritoEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)){
+
+                if (!Utilities.carritoEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)) {
                     Utilities.leerCoockie(sesion, request);
                 }
-                
+
                 cantidadProductoEnCarrito = Utilities.accionesCarrito(
-                        sesion, 
-                        idProducto, 
+                        sesion,
+                        idProducto,
                         accionesACarritoArr[1]);
                 productosEnCarrito = Utilities.sumUnidadesCarrito((List<Carrito>) sesion.getAttribute("carrito"));
                 sesion.setAttribute("sumaProductosEnCarrito", productosEnCarrito);
-                
-                if(Utilities.usuarioEstaEnSesion(sesion)) {
+
+                if (Utilities.usuarioEstaEnSesion(sesion)) {
                     usuario = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
                     pedao = daof.getPedidoDAO();
                     pldao = daof.getLineaPedidoDAO();
                     idPedido = pedao.getPedidoIdDeCarritoUsuario(usuario.getIdUsuario());
-                    if (accionesACarritoArr[1].equals("anadirACarrito") && cantidadProductoEnCarrito == 1){
-                        pldao.insertarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
-                    }else if (cantidadProductoEnCarrito == 0){
+
+                    if (productosEnCarrito == 0) {
                         pldao.eliminarLinea(idPedido, idProducto);
-                    }else{
-                        pldao.actualizarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
+                        pedao.eliminarPedido(idPedido);
+                    } else {
+                        if (cantidadProductoEnCarrito == 0) {
+                            pldao.eliminarLinea(idPedido, idProducto);
+                        } else {
+                            if (productosEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
+                                idPedido = pedao.crearPedido(usuario.getIdUsuario());
+                            }
+                            if (cantidadProductoEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
+                                pldao.insertarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
+                            } else {
+                                pldao.actualizarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
+                            }
+                        }
                     }
-                }else{
+
+                } else {
                     Utilities.crearCookie(sesion, response);
                 }
-                
+
                 objeto = new JSONObject();
                 objeto.put("productosEnCarrito", productosEnCarrito);
                 objeto.put("cantidadProductoEnCarrito", cantidadProductoEnCarrito);
@@ -203,23 +220,53 @@ public class Ajax extends HttpServlet {
                 idProducto = g.fromJson(request.getParameter("arreglo"), Short.class);
 
                 sesion = request.getSession();
-                
-                if (!Utilities.usuarioEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)){
+
+                if (!Utilities.usuarioEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)) {
                     Utilities.leerCoockie(sesion, request);
                 }
-                
+
                 objeto = new JSONObject();
-                objeto.put("cantidadProductoEnCarrito", 
+                objeto.put("cantidadProductoEnCarrito",
                         Utilities.productoEnCarrito(
-                                (List<Carrito>) request.getSession().getAttribute("carrito"), 
+                                (List<Carrito>) request.getSession().getAttribute("carrito"),
                                 idProducto));
 
                 // mandamos el objeto
                 response.setContentType("application/text");
                 response.getWriter().print(objeto);
                 break;
+            case "carritoFactura":
+                listadoCarrito = (List) request.getSession().getAttribute("carrito");
+
+                precioTotalSinIVA = Utilities.sumPreciosCarrito(listadoCarrito);
+                precioTotalConIVA = precioTotalSinIVA * 1.21f;
+                diferenciaDeIVA = precioTotalSinIVA * .21f;
+
+                arrayJSON = new JSONArray();
+                iteratorCarrito = listadoCarrito.iterator();
+                while (iteratorCarrito.hasNext()) {
+                    carrito = iteratorCarrito.next();
+
+                    objeto = new JSONObject();
+                    objeto.put("nombre", carrito.getProducto().getNombre());
+                    objeto.put("precio", carrito.getProducto().getPrecio());
+                    objeto.put("cantidad", carrito.getCantidad());
+
+                    arrayJSON.add(objeto);
+                }
+
+                objeto = new JSONObject();
+                objeto.put("precioTotalSinIVA", precioTotalSinIVA);
+                objeto.put("precioTotalConIVA", precioTotalConIVA);
+                objeto.put("diferenciaDeIVA", diferenciaDeIVA);
+                objeto.put("listadoCarrito", arrayJSON);
+
+                // mandamos el objeto
+                response.setContentType("application/text");
+                response.getWriter().print(objeto);
+                break;
             case "2":
-                
+
                 break;
         }
     }

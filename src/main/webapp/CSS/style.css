@@ -55,6 +55,14 @@ footer img.logo{
 
 }
 
+#modalFacturaModal{
+    transform: translateY(1rem);
+}
+
+#modalFacturaModal .modal-body{
+    padding-bottom: 5rem;
+}
+
 @media only screen and (min-width: 900px){
     .img-producto {
         min-height: 12rem;

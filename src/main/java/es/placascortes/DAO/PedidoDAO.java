@@ -4,6 +4,7 @@
  */
 package es.placascortes.DAO;
 
+import es.placascortes.beans.Pedido;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,7 +54,7 @@ public class PedidoDAO implements IPedidoDAO {
         Short idPedido = null;
 
         PreparedStatement sentenciaPreparada = null;
-        String sql = "select lineaspedidos.idPedido from lineaspedidos inner join pedidos on lineaspedidos.idPedido = pedidos.idPedido where pedidos.idUsuario = ?  and pedidos.estado = \'c\'";
+        String sql = "select idPedido from pedidos where idUsuario = ? and estado = \'c\'";
         try {
             Connection conexion = ConnectionFactory.getConnection();
             sentenciaPreparada = conexion.prepareStatement(sql);
@@ -73,6 +74,52 @@ public class PedidoDAO implements IPedidoDAO {
         return idPedido;
     }
 
+    @Override
+    public void finalizarPedido(Pedido pedido) {
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "update pedidos set fecha = ?, estado = \'f\', importe = ?, iva = ? where  idPedido = ? ";
+
+        try {
+            Connection conexion = ConnectionFactory.getConnection();
+            conexion.setAutoCommit(false);
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            sentenciaPreparada.setDate(1, new java.sql.Date(pedido.getFecha().getTime()));
+            sentenciaPreparada.setFloat(2, pedido.getImporte());
+            sentenciaPreparada.setFloat(3, pedido.getIva());
+            sentenciaPreparada.setShort(4, pedido.getIdPedido());
+            
+            sentenciaPreparada.executeUpdate();
+            conexion.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+    }
+
+    @Override
+    public void eliminarPedido(Short idPedido) {
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "delete from pedidos where idPedido = ?";
+
+        try {
+            // creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            conexion.setAutoCommit(false);
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            sentenciaPreparada.setShort(1, idPedido);
+
+            sentenciaPreparada.executeUpdate();
+            conexion.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+    }
+    
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();

@@ -141,8 +141,6 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
 
     @Override
     public void eliminarLinea(Short idPedido, Short idProducto) {
-        ResultSet resultado = null;
-
         PreparedStatement sentenciaPreparada = null;
         String sql = "delete from lineaspedidos where idPedido = ? and idProducto = ?";
 

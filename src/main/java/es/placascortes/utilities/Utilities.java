@@ -100,6 +100,14 @@ public class Utilities implements Serializable {
         }
         return sumUnidades;
     }
+    
+    public static Float sumPreciosCarrito(List<Carrito> listadoCarrito) {
+        Float sumPrecios = 0f;
+        for (Carrito carrito : listadoCarrito) {
+            sumPrecios += carrito.getCantidad() * carrito.getProducto().getPrecio();
+        }
+        return sumPrecios;
+    }
 
     public static Short productoEnCarrito(List<Carrito> listadoCarrito, Short idCarrito) {
         Short resultado = 0;
@@ -132,7 +140,7 @@ public class Utilities implements Serializable {
             }
         }
 
-        Cookie cookie = new Cookie("carrito", resultado.toString());
+        Cookie cookie = new Cookie("carritoPlacasCortes", resultado.toString());
 
         cookie.setMaxAge(listadoCarrito == null || resultado.toString().isBlank() ? 0 : 172800);
         response.addCookie(cookie);
@@ -155,7 +163,7 @@ public class Utilities implements Serializable {
         String[] carritoArr = null;
         if (cookies != null) {
             for (int i = 0; i < cookies.length && cookie == null; i++) {
-                if (cookies[i].getName().equals("carrito")) {
+                if (cookies[i].getName().equals("carritoPlacasCortes")) {
                     cookie = cookies[i];
                 }
             }
@@ -213,7 +221,7 @@ public class Utilities implements Serializable {
      * @param response
      */
     public static void eliminarCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("carrito", "");
+        Cookie cookie = new Cookie("carritoPlacasCortes", "");
 
         cookie.setMaxAge(0);
         response.addCookie(cookie);

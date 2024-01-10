@@ -82,7 +82,7 @@
         <jsp:include page="JSP/INCLUDES/header.jsp">
             <jsp:param name="hayCuentaEnSession" value="${sessionScope.usuarioEnSesion != null}"/>
             <jsp:param name="carritoEnSesion" value="${sessionScope.carrito}"/>
-            <jsp:param name="coockieCarrito" value="${cookie.carrito.value}"/>
+            <jsp:param name="coockieCarrito" value="${cookie.carritoPlacasCortes.value}"/>
         </jsp:include>
         <main class="d-flex align-items-start justify-content-center  h-100 w-100 py-4">
             <aside class="h-100 w-25 flex-column p-3 d-flex justify-content-start align-items-center gap-3">
