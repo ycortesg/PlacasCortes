@@ -27,8 +27,8 @@ let botonInicioSesion = document.querySelector("button#inicioSesion");
 let containerProductos = document.querySelector("#containerProductos");
 
 let partesURL = modalProductoImagenProducto.src.split('/');
-const defaultURLProducto = partesURL.slice(0, -2).join('/');
-const defaultURLCategoria = modalProductoImagenCategoria.src.substr(0, modalProductoImagenCategoria.src.lastIndexOf('/') + 1);
+const defaultURLProducto = document.querySelector("script#main").getAttribute("data-productos-route"); 
+const defaultURLCategoria = document.querySelector("script#main").getAttribute("data-categorias-route"); 
 
 const formateoMoneda = new Intl.NumberFormat('es-ES', {
     style: 'currency',
@@ -40,6 +40,16 @@ const formateoMoneda = new Intl.NumberFormat('es-ES', {
     currencyDisplay: 'narrowSymbol'
 });
 
+function controlarErroresImagen() {
+    Array.from(document.querySelectorAll("img#imagenCategoriaCarta"))
+            .filter((imagen) => !imagen.classList.contains("control"))
+            .forEach((element) => {
+                element.classList.add("control");
+                element.addEventListener("error", () => {
+                    element.src = `${element.src.substr(0, element.src.lastIndexOf('/') + 1)}default.jpg`;
+                });
+            });
+}
 
 function mandarFiltro() {
 
@@ -64,13 +74,14 @@ function mandarFiltro() {
                                         <h4 class="fw-bolder ">${formateoMoneda.format(producto.precio)}</h4>
                                         <h5>${producto.marca}</h5>
                                     </div>
-                                    <img src="${defaultURLCategoria}${producto.imagenCategoria}" alt="${producto.imagenCategoria}" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
+                                    <img src="${defaultURLCategoria}${producto.imagenCategoria}" alt="${producto.imagenCategoria}" id="imagenCategoriaCarta" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
                                 </div>
                             </div>
                         </div>
                     </div>
 `;
             });
+            controlarErroresImagen();
             anadirEventosAProductos();
         }
     };
@@ -125,7 +136,7 @@ function productoEnCarrito(id) {
 }
 
 function eliminarEventListeners() {
-    
+
     let botonEliminarProductoDeCarritoClone = botonEliminarProductoDeCarrito.cloneNode(true);
     let botonEliminarUnidadDeCarritoClone = botonEliminarUnidadDeCarrito.cloneNode(true);
     let botonAnadirACarritoClone = botonAnadirACarrito.cloneNode(true);
@@ -133,7 +144,7 @@ function eliminarEventListeners() {
     botonEliminarProductoDeCarrito.parentNode.replaceChild(botonEliminarProductoDeCarritoClone, botonEliminarProductoDeCarrito);
     botonEliminarUnidadDeCarrito.parentNode.replaceChild(botonEliminarUnidadDeCarritoClone, botonEliminarUnidadDeCarrito);
     botonAnadirACarrito.parentNode.replaceChild(botonAnadirACarritoClone, botonAnadirACarrito);
-    
+
     botonEliminarProductoDeCarrito = botonEliminarProductoDeCarritoClone;
     botonEliminarUnidadDeCarrito = botonEliminarUnidadDeCarritoClone;
     botonAnadirACarrito = botonAnadirACarritoClone;
@@ -205,7 +216,11 @@ selectMarcas.addEventListener("click", () => {
     mandarFiltro();
 });
 
-if (botonInicioSesion){
+modalProductoImagenCategoria.addEventListener("error", () => {
+    modalProductoImagenCategoria.src = `${defaultURLCategoria}default.jpg`;
+});
+
+if (botonInicioSesion) {
     botonInicioSesion.addEventListener("click", () => {
         if (!modalProducto.classList.contains("d-none"))
             modalProducto.classList.add("d-none");
@@ -214,4 +229,5 @@ if (botonInicioSesion){
     });
 }
 
+controlarErroresImagen();
 anadirEventosAProductos();

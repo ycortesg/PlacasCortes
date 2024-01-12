@@ -4,12 +4,16 @@
  */
 package es.placascortes.DAO;
 
+import es.placascortes.beans.LineaPedido;
 import es.placascortes.beans.Pedido;
+import es.placascortes.beans.Producto;
+import es.placascortes.beans.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 /**
  *
@@ -17,6 +21,53 @@ import java.sql.Statement;
  */
 public class PedidoDAO implements IPedidoDAO {
 
+    @Override
+    public Pedido crearCarritoDeLineasPedido(Short idUsuario) {
+        ResultSet resultado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "select lineaspedidos.idProducto, lineaspedidos.cantidad from lineaspedidos inner join pedidos on lineaspedidos.idPedido = pedidos.idPedido where pedidos.idUsuario = ?  and pedidos.estado = \'c\'";
+        Pedido pedidoCarrito = null;
+        Usuario usuario = null;
+        LineaPedido lineaPedido = null;
+        Producto producto = null;
+        try {
+            // creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            // Llenamos la sentencia preparada con los datos introducidos
+            sentenciaPreparada.setShort(1, idUsuario);
+
+            // Recogemos el resultado
+            resultado = sentenciaPreparada.executeQuery();
+            pedidoCarrito = new Pedido();
+            pedidoCarrito.setListadoLineasPedido(new ArrayList<>());
+            
+            usuario = new Usuario();
+            usuario.setIdUsuario(idUsuario);
+            
+            pedidoCarrito.setUsuario(usuario);
+            while (resultado.next()) {
+                lineaPedido = new LineaPedido();
+                producto = new Producto();
+
+                producto.setIdProducto(resultado.getShort("idProducto"));
+                lineaPedido.setCantidad(resultado.getByte("cantidad"));
+
+                lineaPedido.setProducto(producto);
+
+                pedidoCarrito.getListadoLineasPedido().add(lineaPedido);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+
+        return pedidoCarrito;
+    }
+    
     @Override
     public Short crearPedido(Short idUsuario) {
         ResultSet resultado = null;

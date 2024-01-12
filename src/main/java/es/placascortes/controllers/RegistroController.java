@@ -68,7 +68,6 @@ public class RegistroController extends HttpServlet {
         Usuario usuario = null;
         Pedido pedido = null;
         Short estadoRegistro = null;
-        Short idPedidoGenerado = null;
 
         switch (opcion) {
             case "registrate":
@@ -103,21 +102,28 @@ public class RegistroController extends HttpServlet {
                         
                         usuario.setIdUsuario((short) (estadoRegistro * -1));
 
-                        idPedidoGenerado = pedao.crearPedido(usuario.getIdUsuario());
-                        lpdao.crearLineasPedido(pedido, idPedidoGenerado);
+                        pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
+                        lpdao.crearLineasPedido(pedido);
                         
                         request.getSession().removeAttribute("carrito");
                         Utilities.eliminarCookie(response);
+                        Utilities.enviarAvisoRequest(request, 
+                                "Te has registrado correctamente", 
+                                false);
                         urlDispatcher = "index.jsp";
 
                     } catch (IllegalAccessException | InvocationTargetException ex) {
-                        request.setAttribute("aviso", "Ha ocurrido algun error");
+                        Utilities.enviarAvisoRequest(request, 
+                                "Ha ocurrido algun error", 
+                                true);
                         urlDispatcher = "JSP/registro.jsp";
                         Logger.getLogger(RegistroController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } else {
                     urlDispatcher = "JSP/registro.jsp";
-                    request.setAttribute("aviso", "Todos los campos son necesarios");
+                    Utilities.enviarAvisoRequest(request, 
+                                "Todos los campos son necesarios", 
+                                true);
                 }
                 break;
             case "volver":

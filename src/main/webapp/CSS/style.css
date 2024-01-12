@@ -55,6 +55,15 @@ footer img.logo{
 
 }
 
+div.error{
+    background-repeat: no-repeat;
+    background-position: center;
+    box-shadow: 10px 10px 10px #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 #modalFacturaModal{
     transform: translateY(1rem);
 }

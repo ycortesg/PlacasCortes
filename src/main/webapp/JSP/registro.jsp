@@ -1,4 +1,5 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -14,10 +15,16 @@
               crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="icon" type="image/x-icon" href="${applicationScope.imagenes}LOGOS/logo.ico">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="${applicationScope.javascript}registro.js" defer type="module"></script>
+        <script id="main" src="${applicationScope.javascript}registro.js" data-json-route="${applicationScope.path}JSON/provincias.json" defer type="module"></script>
         <title>Registro</title>
     </head>
     <body class="vh-100 d-flex align-items-center justify-content-center flex-column">
+        <c:if test="${request.aviso != null}">
+            <jsp:include page="JSP/INCLUDES/avisos.jsp">
+                <jsp:param name="error" value="${sessionScope.error != null}"/>
+                <jsp:param name="mensaje" value="${sessionScope.aviso}"/>
+            </jsp:include>
+        </c:if>
         <h1>Registro</h1>
 
         <form method="POST" action="RegistroController">
@@ -33,8 +40,8 @@
             </div>
             <div class="form-group">
                 <label for="telefono">Número de teléfono:</label>
-                <input name="telefono" type="tel" class="form-control" id="telefono" pattern="[0-9]{9}" required
-                       oninvalid="this.setCustomValidity('9 digitos')"
+                <input name="telefono" type="tel" class="form-control" id="telefono" pattern="^(9|8|7|6)\\d{8}$" required
+                       oninvalid="this.setCustomValidity('9 digitos que empieza por 9, 8, 7 o 6')"
                        oninput="this.setCustomValidity('')">
             </div>
             <div class="form-group">

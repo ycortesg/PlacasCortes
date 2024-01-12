@@ -10,6 +10,7 @@ import es.placascortes.beans.Pedido;
  * @author _
  */
 public interface IPedidoDAO {
+    public Pedido crearCarritoDeLineasPedido(Short idUsuario);
     public Short crearPedido(Short idUsuario);
     public Short getPedidoIdDeCarritoUsuario(Short idUsuario);
     public void eliminarPedido(Short idPedido);

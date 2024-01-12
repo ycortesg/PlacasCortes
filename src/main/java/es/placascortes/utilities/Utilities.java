@@ -235,5 +235,10 @@ public class Utilities implements Serializable {
         cookie.setMaxAge(0);
         response.addCookie(cookie);
     }
-
+    
+    public static HttpServletRequest enviarAvisoRequest(HttpServletRequest request, String mensaje, Boolean esError){
+        request.setAttribute("aviso", mensaje);
+        if (esError) request.setAttribute("error", "error");
+        return request;
+    }
 }

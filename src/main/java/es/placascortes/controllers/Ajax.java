@@ -169,7 +169,7 @@ public class Ajax extends HttpServlet {
                 g = new Gson();
                 String[] accionesACarritoArr = g.fromJson(request.getParameter("arreglo"), String[].class);
 
-                idProducto = Short.parseShort(accionesACarritoArr[0]);
+                idProducto = Short.valueOf(accionesACarritoArr[0]);
                 sesion = request.getSession();
 
                 if (!Utilities.carritoEstaEnSesion(sesion) && !Utilities.usuarioEstaEnSesion(sesion)) {
@@ -192,24 +192,21 @@ public class Ajax extends HttpServlet {
                     usuario = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
                     pedao = daof.getPedidoDAO();
                     pldao = daof.getLineaPedidoDAO();
-                    idPedido = pedao.getPedidoIdDeCarritoUsuario(usuario.getIdUsuario());
+                    idPedido = pedido.getIdPedido();
 
-                    if (productosEnCarrito == 0) {
-                        pldao.eliminarLinea(idPedido, idProducto);
-                        pedao.eliminarPedido(idPedido);
-                    } else {
+                    
                         if (cantidadProductoEnCarrito == 0) {
                             pldao.eliminarLinea(idPedido, idProducto);
                         } else {
                             if (productosEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
-                                idPedido = pedao.crearPedido(usuario.getIdUsuario());
+                                pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
                             }
                             if (cantidadProductoEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
                                 pldao.insertarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
                             } else {
                                 pldao.actualizarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
                             }
-                        }
+                        
                     }
 
                 } else {

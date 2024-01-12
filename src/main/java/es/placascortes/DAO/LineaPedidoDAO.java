@@ -6,13 +6,10 @@ package es.placascortes.DAO;
 
 import es.placascortes.beans.LineaPedido;
 import es.placascortes.beans.Pedido;
-import es.placascortes.beans.Producto;
-import es.placascortes.beans.Usuario;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 /**
  *
@@ -21,7 +18,7 @@ import java.util.ArrayList;
 public class LineaPedidoDAO implements ILineaPedidoDAO {
 
     @Override
-    public void crearLineasPedido(Pedido pedidoCarrito, Short idPedido) {
+    public void crearLineasPedido(Pedido pedidoCarrito) {
         PreparedStatement sentenciaPreparada = null;
         String sql = "insert into lineaspedidos (idPedido, idProducto, cantidad) values (?, ?, ?)";
 
@@ -32,7 +29,7 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
             for (LineaPedido lineaPedido : pedidoCarrito.getListadoLineasPedido()) {
                 sentenciaPreparada = conexion.prepareStatement(sql);
 
-                sentenciaPreparada.setShort(1, idPedido);
+                sentenciaPreparada.setShort(1, pedidoCarrito.getIdPedido());
                 sentenciaPreparada.setShort(2, lineaPedido.getProducto().getIdProducto());
                 sentenciaPreparada.setByte(3, Byte.parseByte(lineaPedido.getCantidad().toString()));
 
@@ -46,53 +43,6 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
         } finally {
             this.closeConnection();
         }
-    }
-
-    @Override
-    public Pedido crearCarritoDeLineasPedido(Short idUsuario) {
-        ResultSet resultado = null;
-
-        PreparedStatement sentenciaPreparada = null;
-        String sql = "select lineaspedidos.idProducto, lineaspedidos.cantidad from lineaspedidos inner join pedidos on lineaspedidos.idPedido = pedidos.idPedido where pedidos.idUsuario = ?  and pedidos.estado = \'c\'";
-        Pedido pedidoCarrito = null;
-        Usuario usuario = null;
-        LineaPedido lineaPedido = null;
-        Producto producto = null;
-        try {
-            // creamos conexion y sentencia
-            Connection conexion = ConnectionFactory.getConnection();
-            sentenciaPreparada = conexion.prepareStatement(sql);
-
-            // Llenamos la sentencia preparada con los datos introducidos
-            sentenciaPreparada.setShort(1, idUsuario);
-
-            // Recogemos el resultado
-            resultado = sentenciaPreparada.executeQuery();
-            pedidoCarrito = new Pedido();
-            pedidoCarrito.setListadoLineasPedido(new ArrayList<>());
-            
-            usuario = new Usuario();
-            usuario.setIdUsuario(idUsuario);
-            
-            pedidoCarrito.setUsuario(usuario);
-            while (resultado.next()) {
-                lineaPedido = new LineaPedido();
-                producto = new Producto();
-
-                producto.setIdProducto(resultado.getShort("idProducto"));
-                lineaPedido.setCantidad(resultado.getByte("cantidad"));
-
-                lineaPedido.setProducto(producto);
-
-                pedidoCarrito.getListadoLineasPedido().add(lineaPedido);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            this.closeConnection();
-        }
-
-        return pedidoCarrito;
     }
 
     @Override

@@ -78,6 +78,7 @@ public class CarritoController extends HttpServlet {
                         daof = new MySQLDAOFactory();
                         pedao = daof.getPedidoDAO();
                         
+                        urlDispatcher = "index.jsp";
                         usuario = (Usuario) sesion.getAttribute("usuarioEnSesion");
                         
                         pedido = new Pedido();
@@ -87,14 +88,23 @@ public class CarritoController extends HttpServlet {
                         
                         pedao.finalizarPedido(pedido);
                         sesion.removeAttribute("carrito");
+                        Utilities.enviarAvisoRequest(request, 
+                                "Has realizado la compra por in valor de "+String.format("%.2f", pedido.getImporte())+" € mas IVA", 
+                                false);
                         
                     } catch (IllegalAccessException | InvocationTargetException ex) {
-                        request.setAttribute("aviso", "Ha ocurrido algun error");
-                        urlDispatcher = "JSP/registro.jsp";
+                        Utilities.enviarAvisoRequest(request, 
+                                "Ha ocurrido algun error al finalizar la compra", 
+                                true);
+                        urlDispatcher = "JSP/carrito.jsp";
                         Logger.getLogger(RegistroController.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }else{
+                    Utilities.enviarAvisoRequest(request, 
+                                "Necesitas iniciar sesion para finalizar la compra", 
+                                true);
+                    urlDispatcher = "JSP/carrito.jsp";
                 }
-                urlDispatcher = "index.jsp";
                 break;
         }
         request.getRequestDispatcher(urlDispatcher).forward(request, response);

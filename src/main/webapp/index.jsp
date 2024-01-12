@@ -19,9 +19,10 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
               integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
               crossorigin="anonymous" referrerpolicy="no-referrer" />
+        
         <link rel="icon" type="image/x-icon" href="${applicationScope.imagenes}LOGOS/logo.ico">
-        <script src="${applicationScope.javascript}inicio.js" defer type="module"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script id="main" src="${applicationScope.javascript}inicio.js" data-productos-route="${applicationScope.imagenes}PRODUCTOS/" data-categorias-route="${applicationScope.imagenes}CATEGORIAS/" defer type="module"></script>
         <title>Tienda virtual</title>
     </head>
     <body class="d-flex align-items-center justify-content-center flex-column bg-black bg-opacity-10">
@@ -84,6 +85,13 @@
             <jsp:param name="carritoEnSesion" value="${sessionScope.carrito}"/>
             <jsp:param name="coockieCarrito" value="${cookie.carritoPlacasCortes.value}"/>
         </jsp:include>
+
+                            <c:if test="${requestScope.aviso != null}">
+            <jsp:include page="JSP/INCLUDES/avisos.jsp">
+                <jsp:param name="error" value="${requestScope.error != null}"/>
+                <jsp:param name="mensaje" value="${requestScope.aviso}"/>
+            </jsp:include>
+        </c:if>
         <main class="d-flex align-items-start justify-content-center  h-100 w-100 py-4">
             <aside class="h-100 w-25 flex-column p-3 d-flex justify-content-start align-items-center gap-3">
 
@@ -117,7 +125,7 @@
                                         <h4 class="fw-bolder "><fmt:formatNumber type="currency" value="${producto.precio}" pattern="#,##0.00 €"/></h4>
                                         <h5>${producto.marca}</h5>
                                     </div>
-                                    <img src="${applicationScope.imagenes}CATEGORIAS/${producto.categoria.imagen}" alt="${producto.nombre}" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
+                                    <img src="${applicationScope.imagenes}CATEGORIAS/${producto.categoria.imagen}" id="imagenCategoriaCarta" alt="${producto.nombre}" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
                                 </div>
                             </div>
                         </div>

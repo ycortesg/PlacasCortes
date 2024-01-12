@@ -6,6 +6,7 @@ package es.placascortes.DAO;
 
 import es.placascortes.beans.Usuario;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +21,7 @@ public class UsuarioDAO implements IUsuarioDAO {
     @Override
     public Boolean correoEsValido(String correo) {
         ResultSet resultado = null;
-        Boolean estaEnTabla  = null;
+        Boolean estaEnTabla = null;
 
         PreparedStatement sentenciaPreparada = null;
         String sql = "select count(*) as resultado from usuarios where email = ?";
@@ -36,9 +37,9 @@ public class UsuarioDAO implements IUsuarioDAO {
             resultado = sentenciaPreparada.executeQuery();
             resultado.next();
             Integer prueba = resultado.getInt("resultado");
-            
+
             estaEnTabla = resultado.getInt("resultado") > 0;
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -54,14 +55,14 @@ public class UsuarioDAO implements IUsuarioDAO {
         Short estado = -1;
 
         PreparedStatement sentenciaPreparada = null;
-        String sql =usuario.getAvatar() == null ? 
-                "insert into usuarios (email, password, nombre, apellidos, NIF, telefono, direccion, codigoPostal, localidad, provincia) values (?, md5(?), ?, ?, ?, ?, ?, ?, ?, ?)" 
+        String sql = usuario.getAvatar() == null
+                ? "insert into usuarios (email, password, nombre, apellidos, NIF, telefono, direccion, codigoPostal, localidad, provincia) values (?, md5(?), ?, ?, ?, ?, ?, ?, ?, ?)"
                 : "insert into usuarios (email, password, nombre, apellidos, NIF, telefono, direccion, codigoPostal, localidad, provincia, avatar) values (?, md5(?), ?, ? ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conexion = ConnectionFactory.getConnection();
             conexion.setAutoCommit(false);
             sentenciaPreparada = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            
+
             sentenciaPreparada.setString(1, usuario.getEmail());
             sentenciaPreparada.setString(2, usuario.getPassword());
             sentenciaPreparada.setString(3, usuario.getNombre());
@@ -72,45 +73,47 @@ public class UsuarioDAO implements IUsuarioDAO {
             sentenciaPreparada.setString(8, usuario.getCodigoPostal());
             sentenciaPreparada.setString(9, usuario.getLocalidad());
             sentenciaPreparada.setString(10, usuario.getProvincia());
-            
-            if (usuario.getAvatar() != null) sentenciaPreparada.setString(11, usuario.getAvatar());
-            
+
+            if (usuario.getAvatar() != null) {
+                sentenciaPreparada.setString(11, usuario.getAvatar());
+            }
+
             sentenciaPreparada.executeUpdate();
             resultado = sentenciaPreparada.getGeneratedKeys();
             resultado.next();
-             
-            estado =(short) (resultado.getShort(1)*-1);
+
+            estado = (short) (resultado.getShort(1) * -1);
             conexion.commit();
-            
+
         } catch (SQLException e) {
             e.printStackTrace();
             estado = (short) e.getErrorCode();
         } finally {
             this.closeConnection();
         }
-        
+
         return estado;
     }
-    
+
     @Override
     public Usuario usuarioEsValido(Usuario usuario) {
         // Declaramos variables
         ResultSet resultado = null;
-        
+
         PreparedStatement sentenciaPreparada = null;
         String sql = "select idUsuario, nombre, avatar from usuarios where email = ? and password = MD5(?)";
         try {
             // Creamos conexion y sentencia
             Connection conexion = ConnectionFactory.getConnection();
             sentenciaPreparada = conexion.prepareStatement(sql);
-            
+
             // Llenamos la sentencia preparada con los datos introducidos
             sentenciaPreparada.setString(1, usuario.getEmail());
             sentenciaPreparada.setString(2, usuario.getPassword());
-            
+
             // Recogemos el resultado
             resultado = sentenciaPreparada.executeQuery();
-            
+
             // Si el resultado no es nulo se rellena el objeto usuario
             if (resultado.next()) {
                 usuario.setIdUsuario(resultado.getShort("idUsuario"));
@@ -122,13 +125,72 @@ public class UsuarioDAO implements IUsuarioDAO {
         } finally {
             this.closeConnection();
         }
-        
-        return usuario;    
+
+        return usuario;
     }
-    
+
+    @Override
+    public Usuario anadirDetallesAUsuario(Usuario usuario) {
+        // Declaramos variables
+        ResultSet resultado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "select apellidos, telefono, direccion, codigoPostal, localidad, provincia from usuarios where idUsuario = ? ";
+        try {
+            // Creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            // Llenamos la sentencia preparada con los datos introducidos
+            sentenciaPreparada.setShort(1, usuario.getIdUsuario());
+
+            // Recogemos el resultado
+            resultado = sentenciaPreparada.executeQuery();
+
+            // Si el resultado no es nulo se rellena el objeto usuario
+            if (resultado.next()) {
+                usuario.setApellidos(resultado.getString("apellidos"));
+                usuario.setTelefono(resultado.getString("telefono"));
+                usuario.setDireccion(resultado.getString("direccion"));
+                usuario.setCodigoPostal(resultado.getString("codigoPostal"));
+                usuario.setLocalidad(resultado.getString("localidad"));
+                usuario.setProvincia(resultado.getString("provincia"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+
+        return usuario;
+    }
+
+    @Override
+    public void actualizarUltimoAcceso(Short idUsuario) {
+        // Declaramos variables
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "update usuarios set ultimoAcceso = ? where idUsuario = ?";
+        try {
+            // Creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            conexion.setAutoCommit(false);
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            // Llenamos la sentencia preparada con los datos requeridos
+            sentenciaPreparada.setDate(1, new Date(new java.util.Date().getTime()));
+            sentenciaPreparada.setShort(2, idUsuario);
+
+            sentenciaPreparada.executeUpdate();
+            conexion.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+    }
+
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();
     }
-
 }

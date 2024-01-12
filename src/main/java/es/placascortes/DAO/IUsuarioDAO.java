@@ -13,6 +13,8 @@ import es.placascortes.beans.Usuario;
 public interface IUsuarioDAO{
     public Boolean correoEsValido(String correo);
     public Usuario usuarioEsValido(Usuario usuario);
+    public Usuario anadirDetallesAUsuario(Usuario usuario);
     public Short registrarUsuario(Usuario usuario);
+    public void actualizarUltimoAcceso(Short idUsuario);
     public void closeConnection();
 }

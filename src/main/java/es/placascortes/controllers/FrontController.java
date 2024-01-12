@@ -5,12 +5,12 @@
 package es.placascortes.controllers;
 
 import es.placascortes.DAO.ILineaPedidoDAO;
+import es.placascortes.DAO.IPedidoDAO;
 import es.placascortes.DAO.IProductoDAO;
 import es.placascortes.DAO.IUsuarioDAO;
-import es.placascortes.DAO.LineaPedidoDAO;
+import es.placascortes.DAO.PedidoDAO;
 import es.placascortes.DAOFactory.DAOFactory;
 import es.placascortes.DAOFactory.MySQLDAOFactory;
-import es.placascortes.beans.LineaPedido;
 import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Producto;
 import es.placascortes.beans.Usuario;
@@ -31,7 +31,6 @@ import org.apache.commons.beanutils.BeanUtils;
  *
  * @author _
  */
-@WebServlet(name = "FrontController", urlPatterns = {"/FrontController"})
 public class FrontController extends HttpServlet {
 
     /**
@@ -70,6 +69,7 @@ public class FrontController extends HttpServlet {
         IProductoDAO pdao = null;
         IUsuarioDAO udao = null;
         ILineaPedidoDAO lpdao = null;
+        IPedidoDAO pedao = null;
 
         switch (opcion) {
             case "inicioSesion":
@@ -77,23 +77,43 @@ public class FrontController extends HttpServlet {
                     try {
                         usuario = new Usuario();
                         BeanUtils.populate(usuario, request.getParameterMap());
-                        
+
                         daof = new MySQLDAOFactory();
                         udao = daof.getUsuarioDAO();
-                        
+
                         usuario = udao.usuarioEsValido(usuario);
-                        
-                        if (usuario.getIdUsuario() != null){
+
+                        if (usuario.getIdUsuario() != null) {
+                            udao.actualizarUltimoAcceso(usuario.getIdUsuario());
                             request.getSession().setAttribute("usuarioEnSesion", usuario);
-                            
-                            lpdao = new LineaPedidoDAO();
-                            pedido = lpdao.crearCarritoDeLineasPedido(usuario.getIdUsuario());
-                            
+
+                            pedao = new PedidoDAO();
+                            pedido = pedao.crearCarritoDeLineasPedido(usuario.getIdUsuario());
+
+                            if (!pedido.getListadoLineasPedido().isEmpty()) {
+                                pedao = daof.getPedidoDAO();
+                                pedido.setIdPedido(pedao.getPedidoIdDeCarritoUsuario(usuario.getIdUsuario()));
+                            }
+
+                            Utilities.enviarAvisoRequest(request,
+                                    "Has iniciado sesion correctamente",
+                                    false);
                             request.getSession().setAttribute("carrito", pedido);
+                        } else {
+                            Utilities.enviarAvisoRequest(request,
+                                    "El usuario o la contrasena son incorrectos",
+                                    true);
                         }
                     } catch (IllegalAccessException | InvocationTargetException ex) {
+                        Utilities.enviarAvisoRequest(request,
+                                "Ha ocurrido algun error al inetar iniciar sesion",
+                                true);
                         Logger.getLogger(FrontController.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                } else {
+                    Utilities.enviarAvisoRequest(request,
+                            "Para iniciar sesion necesitas rellenar el email y la contrasena",
+                            true);
                 }
                 urlDispatcher = "index.jsp";
                 break;
@@ -101,11 +121,30 @@ public class FrontController extends HttpServlet {
                 urlDispatcher = "JSP/registro.jsp";
                 break;
             case "cuenta":
-                urlDispatcher = "JSP/menuUsuario.jsp";
+                usuario = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
+                if (usuario != null) {
+                    daof = new MySQLDAOFactory();
+                    udao = daof.getUsuarioDAO();
+
+                    usuario = udao.anadirDetallesAUsuario(usuario);
+                    request.getSession().setAttribute("usuarioEnSesion", usuario);
+
+                    urlDispatcher = "JSP/menuUsuario.jsp";
+                } else {
+                    Utilities.enviarAvisoRequest(request, 
+                                "Para acceder al menu de la cuenta necesitas iniciar sesion", 
+                                true);
+                    urlDispatcher = "index.jsp";
+                }
                 break;
             case "cerrerSesion":
-                if (Utilities.carritoEstaEnSesion(request.getSession()))request.getSession().removeAttribute("carrito");
+                if (Utilities.carritoEstaEnSesion(request.getSession())) {
+                    request.getSession().removeAttribute("carrito");
+                }
                 request.getSession().removeAttribute("usuarioEnSesion");
+                Utilities.enviarAvisoRequest(request, 
+                                "Has cerrado sesion correctamente", 
+                                false);
                 urlDispatcher = "index.jsp";
                 break;
             case "carrito":
@@ -135,6 +174,7 @@ public class FrontController extends HttpServlet {
         }
 
         request.getRequestDispatcher(urlDispatcher).forward(request, response);
+
     }
 
     /**
