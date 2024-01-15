@@ -16,12 +16,40 @@ import es.placascortes.DAO.IUsuarioDAO;
  */
 public abstract class DAOFactory {
     
+    /**
+     *
+     * @return
+     */
     public abstract ICategoriaDAO getCategoriaDAO();
+
+    /**
+     *
+     * @return
+     */
     public abstract IProductoDAO getProductoDAO();
+
+    /**
+     *
+     * @return
+     */
     public abstract IUsuarioDAO getUsuarioDAO();
+
+    /**
+     *
+     * @return
+     */
     public abstract IPedidoDAO getPedidoDAO();
+
+    /**
+     *
+     * @return
+     */
     public abstract ILineaPedidoDAO getLineaPedidoDAO();
     
+    /**
+     *
+     * @return
+     */
     public static DAOFactory getDAOFactory(){
         return new MySQLDAOFactory();
     }

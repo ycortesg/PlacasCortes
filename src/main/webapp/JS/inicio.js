@@ -1,5 +1,4 @@
-
-//TODO: arreglar session para que coja la suma suma al iniciar la aplicacion
+// Declaramos variables
 const url = "Ajax";
 
 let burbujaCarrito = document.querySelector("span#burbujaCarrito b");
@@ -26,9 +25,11 @@ let botonEliminarProductoDeCarrito = modalProducto.querySelector("button#elimina
 let botonInicioSesion = document.querySelector("button#inicioSesion");
 let containerProductos = document.querySelector("#containerProductos");
 
-const defaultURLProducto = document.querySelector("script#main").getAttribute("data-productos-route"); 
-const defaultURLCategoria = document.querySelector("script#main").getAttribute("data-categorias-route"); 
+// URLS de las carpetas de categorias y marcas
+const defaultURLProducto = document.querySelector("script#main").getAttribute("data-productos-route");
+const defaultURLCategoria = document.querySelector("script#main").getAttribute("data-categorias-route");
 
+// Formateo para las monedas
 const formateoMoneda = new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
@@ -39,6 +40,8 @@ const formateoMoneda = new Intl.NumberFormat('es-ES', {
     currencyDisplay: 'narrowSymbol'
 });
 
+// Controla en el caso de haber algun error en elguna imagen de categoria no ensena
+// el mensaje de error sino que cambia la imagen por default
 function controlarErroresImagen() {
     Array.from(document.querySelectorAll("img#imagenCategoriaCarta"))
             .filter((imagen) => !imagen.classList.contains("control"))
@@ -50,6 +53,7 @@ function controlarErroresImagen() {
             });
 }
 
+// Manda al controlador ajax los filtros de la pagina
 function mandarFiltro() {
 
     let request = new XMLHttpRequest();
@@ -61,6 +65,8 @@ function mandarFiltro() {
         if (request.readyState === 4 && request.status === 200) {
             let respuesta = JSON.parse(e.currentTarget.responseText);
             limpiarProductos();
+
+            // Recorre la respuesta y rellena la pagina con los productos filtrados
             respuesta.forEach((producto) => {
                 containerProductos.innerHTML += `
 <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 card-product gap-2" id=\"${producto.idProducto}\" role="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -85,17 +91,20 @@ function mandarFiltro() {
         }
     };
 
+    // Manda los filtros al controlador ajax
     request.send(`accion=buscador&arreglo=${JSON.stringify([
-        Array.from(document.querySelectorAll("input[name='categorias']")).filter(e=>e.checked).map(seleccionados=>seleccionados.value),
-        Array.from(document.querySelectorAll("input[name='marcas']")).filter(e=>e.checked).map(seleccionados=>seleccionados.value),
+        Array.from(document.querySelectorAll("input[name='categorias']")).filter(e => e.checked).map(seleccionados => seleccionados.value),
+        Array.from(document.querySelectorAll("input[name='marcas']")).filter(e => e.checked).map(seleccionados => seleccionados.value),
         [buscador.value.replace(" ", "").length > 3 ? buscador.value : ""]
     ]) }`);
 }
 
+// Elimina todos los productos mostrados en pantalla
 function limpiarProductos() {
     Array.from(containerProductos.querySelectorAll("div.card-product")).forEach(e => e.remove());
 }
 
+// Manda peticion al controlador de ajax con el id del producto y la accion
 function manejoCarrito(id, accion) {
     let request = new XMLHttpRequest();
 
@@ -106,16 +115,21 @@ function manejoCarrito(id, accion) {
         if (request.readyState === 4 && request.status === 200) {
             let respuesta = JSON.parse(e.currentTarget.responseText);
             console.log(respuesta);
+
             if (accion !== "anadirACarrito" || modalBurbujaProducto.innerText === "0") {
                 productoEnCarrito(id);
             }
+
+            // Actualiza las burbujas del producto y del carrito
             modalBurbujaProducto.innerText = respuesta.cantidadProductoEnCarrito;
             burbujaCarrito.innerText = respuesta.productosEnCarrito;
         }
     };
+    // Manda peticion al controlador de ajax con el id del producto y la accion
     request.send(`accion=carritoAjax&arreglo=${JSON.stringify([id, accion])}`);
 }
 
+// Manda peticion al controlador de ajax con el id del producto 
 function productoEnCarrito(id) {
     let request = new XMLHttpRequest();
 
@@ -125,15 +139,19 @@ function productoEnCarrito(id) {
     request.onreadystatechange = (e) => {
         if (request.readyState === 4 && request.status === 200) {
             let respuesta = JSON.parse(e.currentTarget.responseText);
-            console.log(respuesta);
+
+            // Si la cantidad del producto en el carrito es 0 disabilita los botones de eliminar y actualiza la 
+            // burbuja del producto
             modalBurbujaProducto.innerText = respuesta.cantidadProductoEnCarrito;
             botonEliminarProductoDeCarrito.disabled = respuesta.cantidadProductoEnCarrito == 0;
             botonEliminarUnidadDeCarrito.disabled = respuesta.cantidadProductoEnCarrito == 0;
         }
     };
+    // Manda peticion al controlador de ajax con el id del producto 
     request.send(`accion=productoEnCarrito&arreglo=${JSON.stringify(id)}`);
 }
 
+// Elimina los eventListener de los botones del modal
 function eliminarEventListeners() {
 
     let botonEliminarProductoDeCarritoClone = botonEliminarProductoDeCarrito.cloneNode(true);
@@ -149,24 +167,26 @@ function eliminarEventListeners() {
     botonAnadirACarrito = botonAnadirACarritoClone;
 }
 
-function actualizarBurbujaCategorias(){
-    let numFiltrosCategorias = Array.from(document.querySelectorAll("input[name='categorias']")).filter(e=>e.checked).length;
-    
+// Actualiza la burbuja de las categorias
+function actualizarBurbujaCategorias() {
+    let numFiltrosCategorias = Array.from(document.querySelectorAll("input[name='categorias']")).filter(e => e.checked).length;
+
     console.log(numFiltrosCategorias)
-    if (!burbujaCategorias.classList.contains("d-none") && numFiltrosCategorias === 0){
+    if (!burbujaCategorias.classList.contains("d-none") && numFiltrosCategorias === 0) {
         burbujaCategorias.classList.add("d-none");
-    } else if (burbujaCategorias.classList.contains("d-none") && numFiltrosCategorias > 0){
+    } else if (burbujaCategorias.classList.contains("d-none") && numFiltrosCategorias > 0) {
         burbujaCategorias.classList.remove("d-none");
     }
     burbujaCategorias.querySelector("b").innerText = numFiltrosCategorias;
 }
 
-function actualizarBurbujaMarcas(){
-    let numFiltrosMarcas = Array.from(document.querySelectorAll("input[name='marcas']")).filter(e=>e.checked).length;
-    
-    if (!burbujaMarcas.classList.contains("d-none") && numFiltrosMarcas === 0){
+// Actualiza la burbuja de las marcas
+function actualizarBurbujaMarcas() {
+    let numFiltrosMarcas = Array.from(document.querySelectorAll("input[name='marcas']")).filter(e => e.checked).length;
+
+    if (!burbujaMarcas.classList.contains("d-none") && numFiltrosMarcas === 0) {
         burbujaMarcas.classList.add("d-none");
-    } else if (burbujaMarcas.classList.contains("d-none") && numFiltrosMarcas > 0){
+    } else if (burbujaMarcas.classList.contains("d-none") && numFiltrosMarcas > 0) {
         burbujaMarcas.classList.remove("d-none");
     }
     burbujaMarcas.querySelector("b").innerText = numFiltrosMarcas;
@@ -184,12 +204,14 @@ function anadirEventosAProductos() {
                     request.onreadystatechange = (eResponse) => {
                         if (request.readyState === 4 && request.status === 200) {
                             let respuesta = JSON.parse(eResponse.currentTarget.responseText);
-                            console.log(respuesta);
+
+                            // muestra el modal de producto y no el de inicio de sesion
                             if (modalProducto.classList.contains("d-none"))
                                 modalProducto.classList.remove("d-none");
                             if (!modalInicioSesion.classList.contains("d-none"))
                                 modalInicioSesion.classList.add("d-none");
 
+                            // Actualiza los datos del modal
                             modalProductoNombreProducto.innerText = respuesta.nombreProducto;
                             modalProductoNombreCategoria.innerText = respuesta.nombreCategoria;
                             modalProductoImagenProducto.src = `${defaultURLProducto}/${respuesta.imagenProducto}.jpg`;
@@ -199,9 +221,11 @@ function anadirEventosAProductos() {
                             modalProductoMarca.innerText = respuesta.marca;
                             modalProductoImagenCategoria.src = `${defaultURLCategoria}${respuesta.imagenCategoria}`;
                             modalProductoImagenCategoria.alt = respuesta.nombreCategoria;
-                            productoEnCarrito(e.id);
 
+                            productoEnCarrito(e.id);
                             eliminarEventListeners();
+
+                            // Anade los eventListener a los botones del modal
                             [
                                 botonAnadirACarrito,
                                 botonEliminarUnidadDeCarrito,
@@ -221,6 +245,7 @@ function anadirEventosAProductos() {
             });
 }
 
+// Manda el filtro cuando tiene mas de 3 letras el input de busqueda
 buscador.addEventListener("keyup", (e) => {
     if (buscador.value.replace(" ", "").length > 3 || (e.key === "Backspace" && buscador.value.replace(" ", "").length <= 3 && containerProductos.querySelectorAll("div.card-product").length === 0)) {
         console.log("succ");
@@ -228,15 +253,19 @@ buscador.addEventListener("keyup", (e) => {
     }
 });
 
+// Cuando se hace click en un checkbox se envian los filtros
 Array.from(document.querySelectorAll("input[type=checkbox]"))
-        .forEach(e=>{
+        .forEach(e => {
             e.addEventListener("click", () => {
                 mandarFiltro();
-                if (e.name === "categorias") actualizarBurbujaCategorias();
-                else if (e.name === "marcas") actualizarBurbujaMarcas();
+                if (e.name === "categorias")
+                    actualizarBurbujaCategorias();
+                else if (e.name === "marcas")
+                    actualizarBurbujaMarcas();
             });
-});
+        });
 
+// Anade evento para prevenir errores a la imagen de categoria del modal
 modalProductoImagenCategoria.addEventListener("error", () => {
     modalProductoImagenCategoria.src = `${defaultURLCategoria}default.jpg`;
 });
@@ -253,20 +282,21 @@ if (botonInicioSesion) {
 controlarErroresImagen();
 anadirEventosAProductos();
 
+// Comprueba los campos de los formularios de la pagina cuando se intenta hacer submit
 (function () {
-  'use strict';
+    'use strict';
 
-  let forms = document.querySelectorAll('.needs-validation');
+    let forms = document.querySelectorAll('.needs-validation');
 
-  Array.prototype.slice.call(forms)
-    .forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
+    Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
 
-        form.classList.add('was-validated');
-      }, false);
-    });
+                    form.classList.add('was-validated');
+                }, false);
+            });
 })();

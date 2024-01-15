@@ -76,27 +76,38 @@ public class CarritoController extends HttpServlet {
                 break;
             case "finalizarCompra":
                 sesion = request.getSession();
+                
+                // Si el usuario y el carrito esta en sesion
                 if (Utilities.usuarioEstaEnSesion(sesion) && Utilities.carritoEstaEnSesion(sesion)) {
                     try {
+                        urlDispatcher = "index.jsp";
+                        
+                        // Declaramos los dao
                         daof = new MySQLDAOFactory();
                         pedao = daof.getPedidoDAO();
                         
-                        urlDispatcher = "index.jsp";
+                        // Recogemos el usuario de sesion
                         usuario = (Usuario) sesion.getAttribute("usuarioEnSesion");
                         
+                        // Rellenamos un pedido nuevo con la informacion introductida que es el importe y el iva
                         pedido = new Pedido();
                         BeanUtils.populate(pedido, request.getParameterMap());
                         pedido.setIdPedido(pedao.getPedidoIdDeCarritoUsuario(usuario.getIdUsuario()));
                         pedido.setFecha(new Date());
                         
+                        // Finalizamos el pedido en la base de datos
                         pedao.finalizarPedido(pedido);
                         
+                        // Eliminamos el carrito de la sesion
                         Utilities.eliminarCarrito(sesion);
+                        
+                        // Enviamos mensaje
                         Utilities.enviarAvisoRequest(request, 
                                 "Has realizado la compra por in valor de "+String.format("%.2f", pedido.getImporte())+" € + IVA", 
                                 false);
                         
                     } catch (IllegalAccessException | InvocationTargetException ex) {
+                        // Enviamos mensaje de error
                         Utilities.enviarAvisoRequest(request, 
                                 "Ha ocurrido algun error al finalizar la compra", 
                                 true);
@@ -104,6 +115,7 @@ public class CarritoController extends HttpServlet {
                         Logger.getLogger(RegistroController.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }else{
+                    // Enviamos mensaje de error
                     Utilities.enviarAvisoRequest(request, 
                                 "Necesitas iniciar sesion para finalizar la compra", 
                                 true);
@@ -115,32 +127,49 @@ public class CarritoController extends HttpServlet {
                 urlDispatcher = "index.jsp";
                 if (Utilities.carritoEstaEnSesion(sesion)){
                     if (Utilities.usuarioEstaEnSesion(sesion)) {
+                        // Declaramos los dao
                         daof = new MySQLDAOFactory();
                         pldao = daof.getLineaPedidoDAO();
                         pedao = daof.getPedidoDAO();
                         
+                        // Declaramos el pedido de carrito y el iterator
                         pedido = (Pedido) sesion.getAttribute("carrito");
                         iteratorLineaPedido = pedido.getListadoLineasPedido().iterator();
                         while (iteratorLineaPedido.hasNext()) {
                             lineaPedido = iteratorLineaPedido.next();
+                            
+                            // Elimina la linea de pedido de la base de datos
                             pldao.eliminarLinea(pedido.getIdPedido(), lineaPedido.getProducto().getIdProducto());
                         }
                         
+                        // Elimina el pedido de la base de datos
                         pedao.eliminarPedido(pedido.getIdPedido());
                     }else{
+                        // Elimina la cookie
                         Utilities.eliminarCookie(response);
                     }
+                    
+                    // Elimina el carrito de sesion
                     Utilities.eliminarCarrito(sesion);
+                    
+                    // Enviamos mensaje
                     Utilities.enviarAvisoRequest(request, 
                                 "Se ha eliminado el carrito correctamente", 
                                 false);
-                }else{
-                    Utilities.leerCoockie(sesion, request);
+                }else if (!Utilities.usuarioEstaEnSesion(sesion)){
+                    // Lee la cookie del carrito
+                    Utilities.leerCookie(sesion, request);
                     if (Utilities.carritoEstaEnSesion(sesion)){
+                        
+                        // Elimina el carrito de sesion
+                        Utilities.eliminarCarrito(sesion);
+                        
+                        // Enviamos mensaje
                         Utilities.enviarAvisoRequest(request, 
                                 "Se ha eliminado el carrito correctamente", 
                                 false);
                     }else{
+                        // Enviamos mensaje de error
                         Utilities.enviarAvisoRequest(request, 
                                     "No hay ningun carrito que eliminar", 
                                     true);

@@ -16,30 +16,51 @@ import es.placascortes.DAO.ProductoDAO;
 import es.placascortes.DAO.UsuarioDAO;
 
 /**
- *
+ * 
  * @author _
  */
 public class MySQLDAOFactory extends DAOFactory{
+
+    /**
+     *
+     * @return
+     */
     @Override
     public ICategoriaDAO getCategoriaDAO(){
         return new CategoriaDAO();
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public IProductoDAO getProductoDAO(){
         return new ProductoDAO();
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public IUsuarioDAO getUsuarioDAO(){
         return new UsuarioDAO();
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public IPedidoDAO getPedidoDAO(){
         return new PedidoDAO();
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public ILineaPedidoDAO getLineaPedidoDAO(){
         return new LineaPedidoDAO();

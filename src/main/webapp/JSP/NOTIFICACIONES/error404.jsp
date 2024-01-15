@@ -38,7 +38,7 @@
                         ¿Té has perdido <b>${sessionScope.usuarioEnSesion.nombre}</b>?
                     </h3>
                 </c:if>
-                <form action="Volver" method="POST"><input type="submit" name="volver" value="Volver"></form>
+                <form action="Volver" method="POST"><input type="submit" class="btn btn-primary bg-danger" name="volver" value="Volver"></form>
             </div>
         </div>
     </body>

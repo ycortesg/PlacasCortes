@@ -13,10 +13,42 @@ import java.util.List;
  * @author _
  */
 public interface IProductoDAO {
+
+    /**
+     *
+     * @return
+     */
     public List<Producto> getMarcas();
+
+    /**
+     *
+     * @return
+     */
     public List<Producto> getProductosEscaparate();
+
+    /**
+     *
+     * @param listaFiltros
+     * @return
+     */
     public List<Producto> getProductosFiltrados(String listaFiltros[][]);
+
+    /**
+     *
+     * @param id
+     * @return
+     */
     public Producto getProductoDetallesPorId(Short id);
+
+    /**
+     *
+     * @param listadoListaPedido
+     * @return
+     */
     public List<Producto> getDetallesCarrito(List<LineaPedido> listadoListaPedido);
+
+    /**
+     *
+     */
     public void closeConnection();
 }

@@ -22,6 +22,10 @@ import java.util.List;
  */
 public class ProductoDAO implements IProductoDAO {
 
+    /**
+     * Devuelve una lista de las ditintas marcas
+     * @return 
+     */
     @Override
     public List<Producto> getMarcas() {
         ResultSet resultado = null;
@@ -56,6 +60,10 @@ public class ProductoDAO implements IProductoDAO {
         return listadoMarcas;
     }
 
+    /**
+     * Devuelve una lista de 6 producto aleatorios
+     * @return 
+     */
     @Override
     public List<Producto> getProductosEscaparate() {
         ResultSet resultado = null;
@@ -99,6 +107,11 @@ public class ProductoDAO implements IProductoDAO {
         return listadoProductos;
     }
 
+    /**
+     * Devuelve los detalles de un producto por el id Introducido
+     * @param id
+     * @return 
+     */
     @Override
     public Producto getProductoDetallesPorId(Short id) {
         ResultSet resultado = null;
@@ -142,6 +155,11 @@ public class ProductoDAO implements IProductoDAO {
         return producto;
     }
 
+    /**
+     * Devuelve una lista de productos filtrados con los datos introducidos
+     * @param listaFiltros
+     * @return 
+     */
     @Override
     public List<Producto> getProductosFiltrados(String[][] listaFiltros) {
         ResultSet resultado = null;
@@ -204,6 +222,11 @@ public class ProductoDAO implements IProductoDAO {
         return listadoProductos;
     }
 
+    /**
+     * Devuelve una lista de los mismos producto inroducidos pero con detalles del producto
+     * @param listadoListaPedido
+     * @return 
+     */
     @Override
     public List<Producto> getDetallesCarrito(List<LineaPedido> listadoListaPedido) {
         ResultSet resultado = null;
@@ -256,6 +279,9 @@ public class ProductoDAO implements IProductoDAO {
         return listadoProductos;
     }
     
+    /**
+     *
+     */
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();

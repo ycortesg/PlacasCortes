@@ -1,4 +1,4 @@
-
+// Declaramos variables
 let inputNIF = document.querySelector("#nif");
 let letraNIF = document.querySelector("input#letraNIF");
 let inputCodigoPostal = document.querySelector("#codigoPostal");
@@ -22,11 +22,13 @@ let regex = {
     codigoPostal: /^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$/
 };
 
+// Carga el JSON de las provincias
 async function cargarProvincias() {
     let response = await fetch(rutaJSONProvincias);
     codigosPostal = await response.json();
 }
 
+// Comprueba si el nif es valido, de ser asi introduce su numero al input de letranif
 function checkNIFInput() {
     listaCamposValidos[0] = regex.nif.test(inputNIF.value);
     if (regex.nif.test(inputNIF.value)) {
@@ -36,6 +38,7 @@ function checkNIFInput() {
     }
 }
 
+// Comprueba si el codigo postal es valido y si es asi actualiza la provincia
 function checkCodigoPostalInput() {
     listaCamposValidos[1] = regex.codigoPostal.test(inputCodigoPostal.value);
     if (regex.codigoPostal.test(inputCodigoPostal.value)) {
@@ -46,7 +49,7 @@ function checkCodigoPostalInput() {
     }
 }
 
-
+// Combrueba si el correo electronico esta en uso
 function checkEmailInput(valido) {
     if (valido) {
         let request = new XMLHttpRequest();
@@ -76,6 +79,7 @@ function checkEmailInput(valido) {
     }
 }
 
+// Comprueba si todos los campos son validos
 function checkInputsValidos() {
     return (listaCamposValidos.every(e => e) && Array.from(document.querySelectorAll("input")).every(e => e.value !== ""));
 }
@@ -99,6 +103,7 @@ cargarProvincias().then(() => {
     checkCodigoPostalInput();
     checkEmailInput();
 
+    // Comprueba los campos de los formularios de la pagina cuando se intenta hacer submit
     (function () {
         "use strict";
 

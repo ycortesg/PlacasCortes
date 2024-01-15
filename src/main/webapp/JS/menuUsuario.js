@@ -1,3 +1,4 @@
+// Declaramos variables
 let codigosPostal;
 const rutaJSONProvincias = document.querySelector("script#main").getAttribute("data-json-route");
 
@@ -12,6 +13,8 @@ const defaultURLProducto = document.querySelector("script#main").getAttribute("d
 let regexcodigoPostal = /^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$/;
 
 const url = "Ajax";
+
+// Formateo para las monedas
 const formateoMoneda = new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
@@ -22,11 +25,13 @@ const formateoMoneda = new Intl.NumberFormat('es-ES', {
     currencyDisplay: 'narrowSymbol'
 });
 
+// Cargamos las provincias del JSON
 async function cargarProvincias() {
     let response = await fetch(rutaJSONProvincias);
     codigosPostal = await response.json();
 }
 
+// Comprueba si el codigo postal es valido y si es asi actualiza la provincia
 function checkCodigoPostalInput() {
     if (regexcodigoPostal.test(inputCodigoPostal.value)) {
         inputProvincia.value = codigosPostal[inputCodigoPostal.value.substr(0, 2)];
@@ -35,6 +40,7 @@ function checkCodigoPostalInput() {
     }
 }
 
+// Anade los eventos a las cartas de pedidos
 function anadirEventosACartas(){
     Array.from(containerListaPedidos.querySelectorAll("div.card"))
             .forEach((e)=>{
@@ -47,6 +53,7 @@ function anadirEventosACartas(){
     });     
 }
 
+// Anade un producto a los datos del pedido con los datos introducidos
 function anadirProductoPedido(nombre, precio, cantidad, imagen) {
     tableBodyPedido.innerHTML += `
 <tr>
@@ -58,13 +65,17 @@ function anadirProductoPedido(nombre, precio, cantidad, imagen) {
 `;
 }
 
+// Elimina las cartas de pedidos
 function eliminarCartas(){
     containerListaPedidos.replaceChildren();
 }
+
+// Elimina los datos del pedido del modal
 function limpiarModal(){
     tableBodyPedido.replaceChildren();
 }
 
+// Introduce las ultimas 3 lineas del pedido con los datos introducidos
 function anadirInfoFinalAPedido(precioSinIVA, diferenciaIVA, precioConIVA) {
     tableBodyPedido.innerHTML += `
 <tr>
@@ -82,6 +93,7 @@ function anadirInfoFinalAPedido(precioSinIVA, diferenciaIVA, precioConIVA) {
 `;
 }
 
+// Recoge los detalles de un pedido del ajax por su id
 function cargarDetallesPedido(idPedido, importe, iva){
     let request = new XMLHttpRequest();
 
@@ -92,6 +104,7 @@ function cargarDetallesPedido(idPedido, importe, iva){
         if (request.readyState === 4 && request.status === 200) {
             let respuesta = JSON.parse(e.currentTarget.responseText);
             console.log(respuesta);
+            // Anade la informacio introducida mas el importe y el iva al modal
             respuesta.listadoProductosPedido
                     .forEach(element=>anadirProductoPedido(element.nombre, element.precio, element.cantidad, element.imagen));
             
@@ -101,6 +114,7 @@ function cargarDetallesPedido(idPedido, importe, iva){
     request.send(`accion=detallesPedidoFinalizado&arreglo=${JSON.stringify(idPedido)}`);
 }
 
+// Carga los pedidos de una fecha introducida
 function cargarPedidosPorFecha(fecha){
     let request = new XMLHttpRequest();
 
@@ -144,6 +158,7 @@ if (selectFechasPedidos){
     });
 }
 
+// Comprueba los campos de los formularios de la pagina cuando se intenta hacer submit
 (function () {
     'use strict';
 

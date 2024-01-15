@@ -15,26 +15,50 @@ public class LineaPedido implements Serializable{
     private Producto Producto;
     private Byte cantidad;
 
+    /**
+     *
+     * @return
+     */
     public Short getIdLineaPedido() {
         return idLineaPedido;
     }
 
+    /**
+     *
+     * @param idLineaPedido
+     */
     public void setIdLineaPedido(Short idLineaPedido) {
         this.idLineaPedido = idLineaPedido;
     }
 
+    /**
+     *
+     * @return
+     */
     public Producto getProducto() {
         return Producto;
     }
 
+    /**
+     *
+     * @param Producto
+     */
     public void setProducto(Producto Producto) {
         this.Producto = Producto;
     }
 
+    /**
+     *
+     * @return
+     */
     public Byte getCantidad() {
         return cantidad;
     }
 
+    /**
+     *
+     * @param cantidad
+     */
     public void setCantidad(Byte cantidad) {
         this.cantidad = cantidad;
     }

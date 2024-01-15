@@ -70,9 +70,9 @@
                             <img src="${applicationScope.imagenes}CATEGORIAS/default.jpg" id="imagenCategoria" alt="" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
                         </div>
                         <div class="form-group py-2">
-                            <button id="anadirACarrito">Añadir a carrito</button>
-                            <button id="eliminarDeCarrito">Eliminar unidad de carrito</button>
-                            <button id="eliminarDeCarritoEntero">Eliminar de carrito</button>
+                            <button class="btn btn-primary bg-success p-1" id="anadirACarrito">Añadir a carrito</button>
+                            <button class="btn btn-primary bg-info p-1 text-black" id="eliminarDeCarrito">Eliminar unidad de carrito</button>
+                            <button class="btn btn-primary bg-danger p-1" id="eliminarDeCarritoEntero">Eliminar de carrito</button>
                         </div>
                     </div>
                 </div>

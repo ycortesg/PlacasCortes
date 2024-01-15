@@ -19,6 +19,11 @@ import java.sql.Timestamp;
  */
 public class UsuarioDAO implements IUsuarioDAO {
 
+    /**
+     * Devuelve si el correo introducido esta en uso false y si no true
+     * @param correo
+     * @return 
+     */
     @Override
     public Boolean correoEsValido(String correo) {
         ResultSet resultado = null;
@@ -50,6 +55,12 @@ public class UsuarioDAO implements IUsuarioDAO {
         return !estaEnTabla;
     }
 
+    /**
+     * Recoge un usuario e inserta los datos de este en la base de datos
+     * y devuelve el estado de la operacion
+     * @param usuario
+     * @return 
+     */
     @Override
     public Short registrarUsuario(Usuario usuario) {
         ResultSet resultado = null;
@@ -90,6 +101,12 @@ public class UsuarioDAO implements IUsuarioDAO {
         return estado;
     }
 
+    /**
+     * Devuelve si las credenciales son correctas del objeto usuario 
+     * el objeto usuario con su nombre, id y avatar 
+     * @param usuario
+     * @return 
+     */
     @Override
     public Usuario usuarioEsValido(Usuario usuario) {
         // Declaramos variables
@@ -124,6 +141,11 @@ public class UsuarioDAO implements IUsuarioDAO {
         return usuario;
     }
 
+    /**
+     * Devuelve el objeto introducido con mas detelles sobre el 
+     * @param usuario
+     * @return 
+     */
     @Override
     public Usuario anadirDetallesAUsuario(Usuario usuario) {
         // Declaramos variables
@@ -160,6 +182,10 @@ public class UsuarioDAO implements IUsuarioDAO {
         return usuario;
     }
 
+    /**
+     * Actualiza el ultimo acceso de el usuario con el id introducido en la base de datos
+     * @param idUsuario 
+     */
     @Override
     public void actualizarUltimoAcceso(Short idUsuario) {
         // Declaramos variables
@@ -189,6 +215,11 @@ public class UsuarioDAO implements IUsuarioDAO {
         }
     }
 
+    /**
+     * Actualiza los campos del usuario introducido en la base de datos
+     * @param usuario
+     * @return 
+     */
     @Override
     public Short actualizarDatosPersonalesUsuario(Usuario usuario) {
         Short estado = null;
@@ -225,6 +256,13 @@ public class UsuarioDAO implements IUsuarioDAO {
         return estado;
     }
 
+    /**
+     * Actualiza la contrasena del usuario introducida a la 
+     * contrasena introducida en la base de datos
+     * @param usuario
+     * @param passwordNueva
+     * @return 
+     */
     @Override
     public Short actualizarPasswordUsuario(Usuario usuario, String passwordNueva) {
         Short estado = null;
@@ -254,6 +292,10 @@ public class UsuarioDAO implements IUsuarioDAO {
         return estado;    
     }
     
+    /**
+     * Actualiza el nombre del avatar en la base de datos del usuario introducido
+     * @param usuario 
+     */
     @Override
     public void actualizarAvatar(Usuario usuario) {
         // Declaramos variables
@@ -278,6 +320,9 @@ public class UsuarioDAO implements IUsuarioDAO {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();

@@ -81,6 +81,8 @@ public class CuentaController extends HttpServlet {
         Usuario usuarioConDatosNuevos = null;
         DAOFactory daof = null;
         IUsuarioDAO udao = null;
+        
+        // Si el usuario no esta en sesion vuelve al inicio y manda mensaje de error
         if (!Utilities.usuarioEstaEnSesion(request.getSession()) && !opcion.equals("volver")) {
             urlDispatcher = "index.jsp";
             Utilities.enviarAvisoRequest(request,
@@ -90,9 +92,12 @@ public class CuentaController extends HttpServlet {
             switch (opcion) {
                 case "actualizarDatosPersonales":
                     urlDispatcher = "JSP/menuUsuario.jsp";
+                    
+                    // Declaramos el usuario en sesion
                     usuarioEnSesion = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
                     if (Utilities.formularioEstaRelleno(request.getParameterMap())) {
                         try {
+                            // Hacemos una caopia del usuario en sesion pero con los datos introducidos
                             usuarioConDatosNuevos = new Usuario();
                             BeanUtils.populate(usuarioConDatosNuevos, request.getParameterMap());
 
@@ -100,33 +105,44 @@ public class CuentaController extends HttpServlet {
                             usuarioConDatosNuevos.setAvatar(usuarioEnSesion.getAvatar());
                             usuarioConDatosNuevos.setEmail(usuarioEnSesion.getEmail());
 
+                            // Si los dos objetos son iguales
                             if (!usuarioConDatosNuevos.equals(usuarioEnSesion)) {
+                                // Declaramos los dao
                                 daof = new MySQLDAOFactory();
                                 udao = daof.getUsuarioDAO();
+                                
+                                // Actualizamos los datos del usuario
                                 estado = udao.actualizarDatosPersonalesUsuario(usuarioConDatosNuevos);
+                                
+                                // Si ha salido bien se actualiza el usuario en sesion
                                 if (estado == -1) {
                                     request.getSession().setAttribute("usuarioEnSesion", usuarioConDatosNuevos);
 
+                                    // Enviamos mensaje
                                     Utilities.enviarAvisoRequest(request,
                                             "Se han actualizado tus datos personales correctamente",
                                             false);
                                 } else {
+                                    // Enviamos mensaje de error
                                     Utilities.enviarAvisoRequest(request,
                                             "Algo ha salido mal",
                                             true);
                                 }
                             } else {
+                                // Enviamos mensaje de error
                                 Utilities.enviarAvisoRequest(request,
                                         "Tienes que cambiar algun dato para actualizar los datos",
                                         true);
                             }
                         } catch (IllegalAccessException | InvocationTargetException ex) {
+                            // Enviamos mensaje de error
                             Utilities.enviarAvisoRequest(request,
                                     "Ha ocurrido algun error al intentar actualiar tus datos",
                                     true);
                             Logger.getLogger(FrontController.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
+                        // Enviamos mensaje de error
                         Utilities.enviarAvisoRequest(request,
                                 "Todos los campos son obligatorios para cambiar tus datos",
                                 true);
@@ -135,33 +151,44 @@ public class CuentaController extends HttpServlet {
 
                 case "actualizarPassword":
                     urlDispatcher = "JSP/menuUsuario.jsp";
+                    
+                    // Declaramos el usuario en sesion
                     usuarioEnSesion = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
                     if (Utilities.formularioEstaRelleno(request.getParameterMap())) {
+                        // Declaramos los dao
                         daof = new MySQLDAOFactory();
                         udao = daof.getUsuarioDAO();
+                        
+                        // Recogemos la contrasena introducida y lo anadimos a un usuario nuevo
                         passwordAntigua = request.getParameter("passwordOld");
                         usuarioConDatosNuevos = new Usuario();
                         usuarioConDatosNuevos.setEmail(usuarioEnSesion.getEmail());
                         usuarioConDatosNuevos.setPassword(passwordAntigua);
                         usuarioConDatosNuevos = udao.usuarioEsValido(usuarioConDatosNuevos);
+                        
+                        // Si la contrasena es valida recogemos la contrasena nueva la actualizamos en la base de datos
                         if (usuarioConDatosNuevos.getNombre() != null) {
                             passwordNueva = request.getParameter("password");
                             estado = udao.actualizarPasswordUsuario(usuarioEnSesion, passwordNueva);
                             if (estado == -1) {
+                                // Enviamos mensaje 
                                 Utilities.enviarAvisoRequest(request,
                                         "Se ha actualizado la contrasena correctamente",
                                         false);
                             } else {
+                                // Enviamos mensaje de error
                                 Utilities.enviarAvisoRequest(request,
                                         "Algo ha salido mal",
                                         true);
                             }
                         } else {
+                            // Enviamos mensaje de error
                             Utilities.enviarAvisoRequest(request,
                                     "La contrasena antigua no es la correcta",
                                     true);
                         }
                     } else {
+                        // Enviamos mensaje de error
                         Utilities.enviarAvisoRequest(request,
                                 "Todos los campos son obligatorios para cambiar la contrasena",
                                 true);
@@ -172,32 +199,41 @@ public class CuentaController extends HttpServlet {
                     error = false;
                     dirImagen = request.getServletContext().getRealPath("/IMAGES/AVATARS/");
                     nombreFichero = new StringBuilder();
+                    
+                    // Declaramos los dao
                     daof = new MySQLDAOFactory();
                     udao = daof.getUsuarioDAO();
 
                     // Declaramos la factoría
                     factory = new DiskFileItemFactory();
                     upload = new ServletFileUpload(factory);
+                    
                     // Declaramos la lista de objetos FileItem
                     usuarioEnSesion = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
-
                     try {
                         items = upload.parseRequest(request);
-                        // Recorremos la lista con ayuda de iterator
+                        
+                        // Recorremos el iterator de File
                         iteratorFile = items.iterator();
 
                         while (iteratorFile.hasNext() && !error) {
                             uploaded = iteratorFile.next();
+                            
                             // En el caso de que no se un control normal
                             if (!uploaded.isFormField()) {
+                                
                                 // Comprobamos que el fichero tenga la extensión permitida
                                 if (uploaded.getContentType().equals("image/png") || uploaded.getContentType().equals("image/jpeg")) {
+                                    
+                                    // Comprobamos que el tamano es valido
                                     if (uploaded.getSize() < 102400) {
-                                        // Obtenemos la extensión
+                                        // Obtenemos la extension
                                         extension = uploaded.getContentType().equals("image/png") ? ".png" : ".jpg";
+                                        
                                         // Obtenemos el nombre del fichero como AvatarN + identificativo del usuario
                                         nombreFichero.append("AvatarN").append(String.valueOf(usuarioEnSesion.getIdUsuario())).append(extension);
                                         filePath = dirImagen + nombreFichero.toString();
+                                        
                                         // Obtenemos el objeto File a partir de la variable anterior
                                         fichero = new File(filePath);
                                         try {
@@ -205,24 +241,31 @@ public class CuentaController extends HttpServlet {
                                             uploaded.write(fichero);
                                             // Alcenamos el nombre en el objeto usuario
                                             usuarioEnSesion.setAvatar(nombreFichero.toString());
+                                            
+                                            // Actualizamos el usuario en sesion y en la base de datos
                                             request.getSession().setAttribute("usuarioEnSesion", usuarioEnSesion);
                                             udao.actualizarAvatar(usuarioEnSesion);
+                                            
+                                            // Enviamos mensaje
                                             Utilities.enviarAvisoRequest(request,
                                                     "Se ha podido almacenar la imagen en el servidor correctamente",
                                                     false);
                                         } catch (Exception ex) {
+                                            // Enviamos mensaje de error
                                             Utilities.enviarAvisoRequest(request,
                                                     "No se ha podido almacenar la imagen en el servidor",
                                                     true);
                                             error = true;
                                         }
                                     } else {
+                                        // Enviamos mensaje de error
                                         Utilities.enviarAvisoRequest(request,
                                                 "La imagen sobrepasa el tamano permitido",
                                                 true);
                                         error = true;
                                     }
                                 } else {
+                                    // Enviamos mensaje de error
                                     Utilities.enviarAvisoRequest(request,
                                             "La imagen no tiene el formato adecuado",
                                             true);
@@ -231,6 +274,7 @@ public class CuentaController extends HttpServlet {
                             }
                         }
                     } catch (FileUploadException ex) {
+                        // Enviamos mensaje de error
                         Utilities.enviarAvisoRequest(request,
                                 "No se han podido leer los campos del formulario",
                                 true);

@@ -15,8 +15,20 @@ import java.util.List;
 public class Pedido implements Serializable{
     private Short idPedido;
     private Date fecha;
+
+    /**
+     *
+     */
     public enum tipoEstado {
+
+        /**
+         *
+         */
         c,
+
+        /**
+         *
+         */
         f
     };
     private tipoEstado estado;
@@ -25,58 +37,114 @@ public class Pedido implements Serializable{
     private Float iva;
     private List<LineaPedido> listadoLineasPedido;
 
+    /**
+     *
+     * @return
+     */
     public Short getIdPedido() {
         return idPedido;
     }
 
+    /**
+     *
+     * @param idPedido
+     */
     public void setIdPedido(Short idPedido) {
         this.idPedido = idPedido;
     }
 
+    /**
+     *
+     * @return
+     */
     public Date getFecha() {
         return fecha;
     }
 
+    /**
+     *
+     * @param fecha
+     */
     public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
 
+    /**
+     *
+     * @return
+     */
     public tipoEstado getEstado() {
         return estado;
     }
 
+    /**
+     *
+     * @param estado
+     */
     public void setEstado(tipoEstado estado) {
         this.estado = estado;
     }
 
+    /**
+     *
+     * @return
+     */
     public Usuario getUsuario() {
         return usuario;
     }
 
+    /**
+     *
+     * @param usuario
+     */
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
     }
 
+    /**
+     *
+     * @return
+     */
     public Float getImporte() {
         return importe;
     }
 
+    /**
+     *
+     * @param importe
+     */
     public void setImporte(Float importe) {
         this.importe = importe;
     }
 
+    /**
+     *
+     * @return
+     */
     public Float getIva() {
         return iva;
     }
 
+    /**
+     *
+     * @param iva
+     */
     public void setIva(Float iva) {
         this.iva = iva;
     }
 
+    /**
+     *
+     * @return
+     */
     public List<LineaPedido> getListadoLineasPedido() {
         return listadoLineasPedido;
     }
 
+    /**
+     *
+     * @param listadoLineasPedido
+     */
     public void setListadoLineasPedido(List listadoLineasPedido) {
         this.listadoLineasPedido = listadoLineasPedido;
     }

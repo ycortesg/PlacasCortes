@@ -12,6 +12,15 @@ import java.util.List;
  * @author _
  */
 public interface ICategoriaDAO {
+
+    /**
+     *
+     * @return
+     */
     public List<Categoria> getAllCategorias();
+
+    /**
+     *
+     */
     public void closeConnection();
 }

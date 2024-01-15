@@ -27,9 +27,8 @@ public class Utilities implements Serializable {
 
     /**
      * Comprueba si todos los campos del formulario estan rellenos
-     *
      * @param valoresForulario
-     * @return
+     * @return 
      */
     public static boolean formularioEstaRelleno(Map<String, String[]> valoresForulario) {
         boolean faltaAlgunValor = false;
@@ -41,6 +40,15 @@ public class Utilities implements Serializable {
         return !faltaAlgunValor;
     }
 
+    /**
+     * Hace las acciones de anadir unidad, eliminar unidad o eliminar producto del carrito
+     * a partir de el id introducido y la accion introducida y por ultimo devuelve la
+     * cantidad de de el producto introducido que hay en el carrito
+     * @param sesion
+     * @param idProducto
+     * @param accion
+     * @return 
+     */
     public static Byte accionesCarrito(HttpSession sesion, Short idProducto, String accion) {
         
         Pedido pedidoCarrito = (Pedido) sesion.getAttribute("carrito");
@@ -101,6 +109,11 @@ public class Utilities implements Serializable {
         return cantidadProducto;
     }
 
+    /**
+     * Suma las unidades de carrito que hay en el listado introducido
+     * @param listadoLineaPedido
+     * @return
+     */
     public static Integer sumUnidadesCarrito(List<LineaPedido> listadoLineaPedido) {
         Integer sumUnidades = 0;
         for (LineaPedido lineaPedido : listadoLineaPedido) {
@@ -109,6 +122,11 @@ public class Utilities implements Serializable {
         return sumUnidades;
     }
     
+    /**
+     * Suma los precios por las unidades de carrito que hay en el listado introducido
+     * @param listadoLineaPedido
+     * @return
+     */
     public static Float sumPreciosCarrito(List<LineaPedido> listadoLineaPedido) {
         Float sumPrecios = 0f;
         for (LineaPedido lineaPedido : listadoLineaPedido) {
@@ -117,6 +135,12 @@ public class Utilities implements Serializable {
         return sumPrecios;
     }
 
+    /**
+     * Devuelve si el producto esta en el carrito por el id
+     * @param listadoLineaPedido
+     * @param idProducto
+     * @return
+     */
     public static Byte productoEnCarrito(List<LineaPedido> listadoLineaPedido, Short idProducto) {
         byte resultado = 0;
         for (Integer i = 0; listadoLineaPedido != null && i < listadoLineaPedido.size() && resultado == 0; i++) {
@@ -157,13 +181,12 @@ public class Utilities implements Serializable {
     }
 
     /**
-     * pide request y lee la cookie y actualiza la sesion
-     *
+     * Recoge request, lee la cookie y actualiza la sesion con el valor de la cookie
      * @param sesion
      * @param request
      * @throws UnsupportedEncodingException
      */
-    public static void leerCoockie(HttpSession sesion, HttpServletRequest request) throws UnsupportedEncodingException {
+    public static void leerCookie(HttpSession sesion, HttpServletRequest request) throws UnsupportedEncodingException {
         Cookie cookie = null;
         Cookie[] cookies = request.getCookies();
         List<LineaPedido> listadoLineaPedido = null;
@@ -206,8 +229,7 @@ public class Utilities implements Serializable {
     }
 
     /**
-     * devulve si el carrito esta en sesion true y si no false
-     *
+     * Devuelve si el carrito esta en sesion 
      * @param sesion
      * @return
      */
@@ -217,8 +239,7 @@ public class Utilities implements Serializable {
     }
 
     /**
-     * devulve si el usuario esta ensesion true y si no false
-     *
+     * Devulve si el usuario esta en sesion 
      * @param sesion
      * @return
      */
@@ -227,6 +248,10 @@ public class Utilities implements Serializable {
         return usuario != null;
     }
     
+    /**
+     * Elimina las lineas de pedido del carrito y lo actualiza
+     * @param sesion
+     */
     public static void eliminarCarrito(HttpSession sesion) {
         Pedido pedidoCarrito = new Pedido();
         pedidoCarrito.setListadoLineasPedido(new ArrayList());
@@ -235,8 +260,7 @@ public class Utilities implements Serializable {
     }
 
     /**
-     * pide response y elimina la cookie del carrito guardado
-     *
+     * Pide response y elimina la cookie del carrito guardado
      * @param response
      */
     public static void eliminarCookie(HttpServletResponse response) {
@@ -246,6 +270,13 @@ public class Utilities implements Serializable {
         response.addCookie(cookie);
     }
     
+    /**
+     * Recoge request, el mensaje y si es error y envia un mensaje de error por request
+     * @param request
+     * @param mensaje
+     * @param esError
+     * @return
+     */
     public static HttpServletRequest enviarAvisoRequest(HttpServletRequest request, String mensaje, Boolean esError){
         request.setAttribute("aviso", mensaje);
         if (esError) request.setAttribute("error", "error");

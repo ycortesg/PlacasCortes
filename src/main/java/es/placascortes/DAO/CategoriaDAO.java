@@ -18,6 +18,10 @@ import java.util.List;
  */
 public class CategoriaDAO implements ICategoriaDAO {
 
+    /**
+     * Recoge todas las categorias con id y nombre
+     * @return 
+     */
     @Override
     public List<Categoria> getAllCategorias() {
         ResultSet resultado = null;
@@ -54,6 +58,9 @@ public class CategoriaDAO implements ICategoriaDAO {
         return listadoCategorias;
     }
 
+    /**
+     *
+     */
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();

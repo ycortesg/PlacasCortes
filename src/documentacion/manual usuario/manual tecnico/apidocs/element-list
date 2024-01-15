@@ -1,0 +1,7 @@
+es.placascortes.beans
+es.placascortes.controllers
+es.placascortes.DAO
+es.placascortes.DAOFactory
+es.placascortes.events
+es.placascortes.filters
+es.placascortes.utilities

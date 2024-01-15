@@ -23,6 +23,12 @@ import java.util.List;
  */
 public class PedidoDAO implements IPedidoDAO {
 
+    /**
+     * Devuelve un pedido con todas las lineas de pedido que tengan el idUsuario 
+     * introducido y el estado sea c
+     * @param idUsuario
+     * @return 
+     */
     @Override
     public Pedido crearCarritoDeLineasPedido(Short idUsuario) {
         ResultSet resultado = null;
@@ -70,6 +76,11 @@ public class PedidoDAO implements IPedidoDAO {
         return pedidoCarrito;
     }
     
+    /**
+     * Crea un pedido y devuelve su id generado en la base de datos
+     * @param idUsuario
+     * @return 
+     */
     @Override
     public Short crearPedido(Short idUsuario) {
         ResultSet resultado = null;
@@ -101,6 +112,11 @@ public class PedidoDAO implements IPedidoDAO {
         return idGenerado;
     }
 
+    /**
+     * Devuelve el idPedido de el pedido con el idUsuario introducido y el estado c 
+     * @param idUsuario
+     * @return 
+     */
     @Override
     public Short getPedidoIdDeCarritoUsuario(Short idUsuario) {
         ResultSet resultado = null;
@@ -127,6 +143,11 @@ public class PedidoDAO implements IPedidoDAO {
         return idPedido;
     }
 
+    /**
+     * Actualiza la informacion del pedido introducido para que contenga el importe, el iva , la fecha
+     * y el estafo lo pone a f donde el idPedido es el introducido en la base de datos
+     * @param pedido 
+     */
     @Override
     public void finalizarPedido(Pedido pedido) {
         PreparedStatement sentenciaPreparada = null;
@@ -151,6 +172,10 @@ public class PedidoDAO implements IPedidoDAO {
         }
     }
 
+    /**
+     * Elimina el pedido con el idPedido introducido en la base de datos
+     * @param idPedido 
+     */
     @Override
     public void eliminarPedido(Short idPedido) {
         PreparedStatement sentenciaPreparada = null;
@@ -173,6 +198,11 @@ public class PedidoDAO implements IPedidoDAO {
         }
     }
 
+    /**
+     * Devuelve las fechas distintas con pedidos finalizados con el idUsuario introducido
+     * @param idUsuario
+     * @return 
+     */
     @Override
     public List<String> getFechasPedidos(Short idUsuario) {
         ResultSet resultado = null;
@@ -206,12 +236,18 @@ public class PedidoDAO implements IPedidoDAO {
         return listadoFechas;    
     }
 
+    /**
+     * Devuelve los pedidos finalizados con el idUsuario introducido y la fecha introducida
+     * @param idUsuario
+     * @param fecha
+     * @return 
+     */
     @Override
     public List<Pedido> getPedidosDeFechaYUsuario(Short idUsuario, Date fecha) {
         ResultSet resultado = null;
 
         PreparedStatement sentenciaPreparada = null;
-        String sql = "select idPedido, importe, iva from pedidos where idUsuario = ? and fecha = ?";
+        String sql = "select idPedido, importe, iva from pedidos where idUsuario = ? and fecha = ? and estado = \'f\'";
         List<Pedido> listadoPedidosDeFecha = null;
         Pedido pedido = null;
         try {
@@ -245,6 +281,11 @@ public class PedidoDAO implements IPedidoDAO {
         return listadoPedidosDeFecha;
     }
 
+    /**
+     * Devuelve los detalles de un pedido por el idPedido introducido
+     * @param idPedido
+     * @return 
+     */
     @Override
     public Pedido getPedidoFinalizadoPorId(Short idPedido) {
         ResultSet resultado = null;
@@ -288,6 +329,9 @@ public class PedidoDAO implements IPedidoDAO {
         return pedidoFinalizao;
     }
     
+    /**
+     *
+     */
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();

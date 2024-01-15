@@ -12,12 +12,20 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+/**
+ *
+ * @author _
+ */
 public class ConnectionFactory {
 
     static DataSource ds = null;
     static Connection conexion = null;
     static final String DATASOURCE_NAME = "java:comp/env/jdbc/jndi-tienda";
     
+    /**
+     *
+     * @return
+     */
     public static Connection getConnection() {
         try {
             Context contextoInicial = new InitialContext();
@@ -31,6 +39,9 @@ public class ConnectionFactory {
         return conexion;
     }
     
+    /**
+     *
+     */
     public static void closeConnection(){
         try {
             conexion.close();

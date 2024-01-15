@@ -15,7 +15,6 @@ import es.placascortes.utilities.Utilities;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -73,28 +72,36 @@ public class RegistroController extends HttpServlet {
             case "registrate":
                 if (Utilities.formularioEstaRelleno(request.getParameterMap())) {
                     try {
+                        // Rellenamos un objeto Usuario con los datos introducidos
                         letraNIF = request.getParameter("letraNIF");
 
                         usuario = new Usuario();
                         BeanUtils.populate(usuario, request.getParameterMap());
                         usuario.setNIF(usuario.getNIF() + letraNIF);
 
+                        // Declaramos los dao
                         daof = new MySQLDAOFactory();
                         udao = daof.getUsuarioDAO();
 
+                        // Intentamos llevar a cabo el registro
                         estadoRegistro = udao.registrarUsuario(usuario);
                         if (estadoRegistro > -1) {
                             throw new IllegalAccessException();
                         }
+                        
+                        // Lee la cookie y meta la informacion en sesion
                         if (!Utilities.carritoEstaEnSesion(request.getSession())) {
-                            Utilities.leerCoockie(request.getSession(), request);
+                            Utilities.leerCookie(request.getSession(), request);
                         }
 
+                        // Declaramos los dao
                         pedao = daof.getPedidoDAO();
                         lpdao = daof.getLineaPedidoDAO();
                         
+                        // Recogemos el pedido de sesion
                         pedido = (Pedido) request.getSession().getAttribute("carrito");
                         
+                        // Si el pedido es nulo crea uno y le anade el listado de lineas
                         if (pedido == null) {
                             pedido = new Pedido();
                             pedido.setListadoLineasPedido(new ArrayList());
@@ -102,19 +109,26 @@ public class RegistroController extends HttpServlet {
                         
                         usuario.setIdUsuario((short) (estadoRegistro * -1));
 
+                        // Si el carrito no esta vacio
                         if (Utilities.sumUnidadesCarrito(pedido.getListadoLineasPedido()) > 0){
+                            
+                            // Crea el pedido y las lineasPedido en sesion
                             pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
                             lpdao.crearLineasPedido(pedido);
                         }
                         
+                        // Elimina el carrito de sesion y de la cookie
                         request.getSession().removeAttribute("carrito");
                         Utilities.eliminarCookie(response);
+                        
+                        // Enviamos mensaje 
                         Utilities.enviarAvisoRequest(request, 
                                 "Te has registrado correctamente", 
                                 false);
                         urlDispatcher = "index.jsp";
 
                     } catch (IllegalAccessException | InvocationTargetException ex) {
+                        // Enviamos mensaje de error
                         Utilities.enviarAvisoRequest(request, 
                                 "Ha ocurrido algun error", 
                                 true);
@@ -123,6 +137,7 @@ public class RegistroController extends HttpServlet {
                     }
                 } else {
                     urlDispatcher = "JSP/registro.jsp";
+                    // Enviamos mensaje de error
                     Utilities.enviarAvisoRequest(request, 
                                 "Todos los campos son necesarios", 
                                 true);

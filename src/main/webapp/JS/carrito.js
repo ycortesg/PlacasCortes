@@ -1,3 +1,4 @@
+// Declaramos varibles
 const url = "Ajax";
 let botonFacturaModal = document.querySelector("button#botonFacturaModal");
 let tablaFactura = document.querySelector("table#tablaFactura tbody");
@@ -5,6 +6,7 @@ let botonFinalizarCompra = document.querySelector("button#finalizarCompra");
 let inputImporte = document.querySelector("input#importe");
 let inputIVA = document.querySelector("input#iva");
 
+// Formateo para las monedas
 const formateoMoneda = new Intl.NumberFormat('es-ES', {
     style: 'currency',
     currency: 'EUR',
@@ -14,7 +16,7 @@ const formateoMoneda = new Intl.NumberFormat('es-ES', {
     notation: 'standard',
     currencyDisplay: 'narrowSymbol'
 });
-
+// Manda peticion al controlador de ajax con el id del producto y la accion
 function manejoCarrito(id, accion, elementoCantidadProducto, carta) {
     let request = new XMLHttpRequest();
 
@@ -35,13 +37,16 @@ function manejoCarrito(id, accion, elementoCantidadProducto, carta) {
             elementoCantidadProducto.innerText = respuesta.cantidadProductoEnCarrito;
         }
     };
+    // Manda peticion al controlador de ajax con el id del producto y la accion
     request.send(`accion=carritoAjax&arreglo=${JSON.stringify([id, accion])}`);
 }
 
+// Limpia la tabla de la factura de la informacion anterior
 function limpiarTabla() {
     tablaFactura.replaceChildren();
 }
 
+// Anade un producto a la factura con los datos introducidos
 function anadirProductoFactura(nombre, precio, cantidad, indx) {
     tablaFactura.innerHTML += `
 <tr>
@@ -54,6 +59,7 @@ function anadirProductoFactura(nombre, precio, cantidad, indx) {
 `;
 }
 
+// Introduce las ultimas 3 lineas de la factura con los datos introducidos
 function anadirInfoDeFactura(precioSinIVA, diferenciaIVA, precioConIVA) {
     inputImporte.value = precioSinIVA;
     inputIVA.value = diferenciaIVA;
@@ -73,6 +79,7 @@ function anadirInfoDeFactura(precioSinIVA, diferenciaIVA, precioConIVA) {
 `;
 }
 
+// Anadimos las acciones a los botones de los productos
 document.querySelectorAll("section")
         .forEach((e) => {
             e.querySelectorAll("button")
@@ -84,6 +91,7 @@ document.querySelectorAll("section")
         });
         
 if (botonFacturaModal){
+    // Recoge la informacion de la factura
     botonFacturaModal.addEventListener("click", () => {
         if (!botonFacturaModal.disabled) {
             let request = new XMLHttpRequest();

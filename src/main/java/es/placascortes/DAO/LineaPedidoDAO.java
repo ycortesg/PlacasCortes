@@ -17,6 +17,10 @@ import java.sql.SQLException;
  */
 public class LineaPedidoDAO implements ILineaPedidoDAO {
 
+    /**
+     * Inserta todas las lineas de pedido de la lista introducida a la base de datos
+     * @param pedidoCarrito 
+     */
     @Override
     public void crearLineasPedido(Pedido pedidoCarrito) {
         PreparedStatement sentenciaPreparada = null;
@@ -45,6 +49,13 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
         }
     }
 
+    /**
+     * Actualiza la cantidad de la linea de pedido con el idPedido e idProducto introducido
+     * a la cantidad introducida en la base de datos
+     * @param idPedido
+     * @param cantidad
+     * @param idProducto 
+     */
     @Override
     public void actualizarLinea(Short idPedido, Byte cantidad, Short idProducto) {
 
@@ -70,6 +81,12 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
         }
     }
 
+    /**
+     * Inserta una linea pedido con el idPedido, idProducto y cantidad introducidos a la base de datos
+     * @param idPedido
+     * @param cantidad
+     * @param idProducto 
+     */
     @Override
     public void insertarLinea(Short idPedido, Byte cantidad, Short idProducto) {
         ResultSet resultado = null;
@@ -96,6 +113,11 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
         }
     }
 
+    /**
+     * Elimina la linea con el idPedido e idProducto introducidos de la base de datos
+     * @param idPedido
+     * @param idProducto 
+     */
     @Override
     public void eliminarLinea(Short idPedido, Short idProducto) {
         PreparedStatement sentenciaPreparada = null;
@@ -119,6 +141,9 @@ public class LineaPedidoDAO implements ILineaPedidoDAO {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void closeConnection() {
         ConnectionFactory.closeConnection();
