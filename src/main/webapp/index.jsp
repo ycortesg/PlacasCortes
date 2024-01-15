@@ -19,7 +19,7 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
               integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
               crossorigin="anonymous" referrerpolicy="no-referrer" />
-        
+
         <link rel="icon" type="image/x-icon" href="${applicationScope.imagenes}LOGOS/logo.ico">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script id="main" src="${applicationScope.javascript}inicio.js" data-productos-route="${applicationScope.imagenes}PRODUCTOS/" data-categorias-route="${applicationScope.imagenes}CATEGORIAS/" defer type="module"></script>
@@ -34,18 +34,16 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form method="POST" action="FrontController">
-                            <div class="form-group py-2">
-                                <label for="email">Correo electrónico:</label>
-                                <input name="email" type="email" class="form-control" id="email" required 
-                                       pattern="/(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|&quot;(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*&quot;)@(?:(?:a-z0-9?\.)+a-z0-9?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/" 
-                                       placeholder="Ingresa tu correo electrónico" 
-                                       oninvalid="this.setCustomValidity('Correo electrónico válido')"
-                                       oninput="this.setCustomValidity('')">
+                        <form name="form" method="POST" action="FrontController" class="row g-3 needs-validation" novalidate >
+                            <div class="col-md-12">
+                                <label for="email" class="form-label">Correo electrónico</label>
+                                <input type="email" class="form-control" id="email" name="email" required />
+                                <div class="invalid-feedback">Introduce un correo electrónico valido</div>
                             </div>
-                            <div class="form-group py-2">
-                                <label for="password">Contraseña:</label>
-                                <input name="password" type="password" class="form-control" pattern="\S+.*" required id="password" placeholder="Ingresa tu contraseña">
+                            <div class="col-md-12">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required/>
+                                <div class="invalid-feedback">Introduce una contraseña válida</div>
                             </div>
                             <button type="submit" name="opcion" value="inicioSesion" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm my-2">Iniciar Sesion</button>
                         </form>
@@ -86,7 +84,7 @@
             <jsp:param name="coockieCarrito" value="${cookie.carritoPlacasCortes.value}"/>
         </jsp:include>
 
-                            <c:if test="${requestScope.aviso != null}">
+        <c:if test="${requestScope.aviso != null}">
             <jsp:include page="JSP/INCLUDES/avisos.jsp">
                 <jsp:param name="error" value="${requestScope.error != null}"/>
                 <jsp:param name="mensaje" value="${requestScope.aviso}"/>
@@ -100,16 +98,61 @@
                     <i class="fa fa-search"></i>                    
                 </div>
 
-                <select name="categoria" id="categorias" class="form-select m-0" aria-label="Default select example" multiple>
-                    <c:forEach var="categoria" items="${applicationScope.listaCategorias}">
-                        <option value="${categoria.idCategoria}">${categoria.nombre}</option>
-                    </c:forEach>
-                </select>
-                <select name="marca" class="form-select m-0" id="marcas" aria-label="Default select example" multiple>
-                    <c:forEach var="marca" items="${applicationScope.listaMarcas}">
-                        <option value="${marca.marca}">${marca.marca}</option>
-                    </c:forEach>
-                </select>
+                <div class="accordion w-75" id="accordionFiltros">
+                    <div class="accordion-item w-100">
+
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <span id="burbujaCategorias" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                    <b>0</b>
+                                    <span class="visually-hidden">productos en carrito</span>
+                                </span>
+                                Categorías
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionFiltros">
+                            <div class="accordion-body">
+                                <c:forEach var="categoria" items="${applicationScope.listaCategorias}">
+                                    <c:set var="idCategoria" value="id='cate${categoria.idCategoria}'"/>
+                                    <c:set var="forCategoria" value="for='cate${categoria.idCategoria}'"/>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="categorias" value="${categoria.idCategoria}" ${idCategoria}>
+                                        <label class="form-check-label" ${forCategoria}>
+                                            ${categoria.nombre}
+                                        </label>
+                                    </div>
+                                </c:forEach>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item w-100">
+
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                <span id="burbujaMarcas" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                                    <b>0</b>
+                                    <span class="visually-hidden">productos en carrito</span>
+                                </span>
+                                Marcas
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionFiltros">
+                            <div class="accordion-body">
+                                <c:forEach var="marca" items="${applicationScope.listaMarcas}">
+                                    <c:set var="idMarca" value="id='cate${marca.marca}'"/>
+                                    <c:set var="forMarca" value="for='cate${marca.marca}'"/>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="marcas" value="${marca.marca}" ${idMarca}>
+                                        <label class="form-check-label" ${forMarca}>
+                                            ${marca.marca}
+                                        </label>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </aside>
             <div class="d-flex align-items-center justify-content-start h-100 w-75 row pb-5 mb-4" id="containerProductos">
 
@@ -130,7 +173,6 @@
                             </div>
                         </div>
                     </div>
-
                 </c:forEach>
 
             </div>
@@ -158,12 +200,6 @@
                             <h6>+34 666 333 444</h6>
                         </div>
                     </div>
-                </div>
-                <div class="d-flex align-items-start justify-content-start flex-column h-100 gap-1 border-sections-footer px-5 ">
-                    <h3 class="fs-4">Servicio al consumidor</h3>
-                    <button class="bg-transparent border-0" type="submit" name="opcion" value="sobre-nosotros">Sobre nosotros</button>
-                    <button class="bg-transparent border-0" type="submit" name="opcion" value="terminos">Terminos y condiciones</button>
-                    <button class="bg-transparent border-0" type="submit" name="opcion" value="privacidad">Politica de privacidad</button>
                 </div>
             </div>
             <div class="d-flex align-items-center justify-content-center p-3 w-75 border-top border-2 my-3 ">

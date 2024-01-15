@@ -78,6 +78,9 @@ public class Utilities implements Serializable {
                         break;
                 }
                 cantidadProducto = listadoLineas.get(i).getCantidad();
+                if (cantidadProducto == 0){
+                    listadoLineas.remove((int) i);
+                }
             }
         }
         if (!carritoASidoModificado) {
@@ -222,6 +225,13 @@ public class Utilities implements Serializable {
     public static Boolean usuarioEstaEnSesion(HttpSession sesion) {
         Usuario usuario = (Usuario) sesion.getAttribute("usuarioEnSesion");
         return usuario != null;
+    }
+    
+    public static void eliminarCarrito(HttpSession sesion) {
+        Pedido pedidoCarrito = new Pedido();
+        pedidoCarrito.setListadoLineasPedido(new ArrayList());
+        
+        sesion.setAttribute("carrito", pedidoCarrito);
     }
 
     /**

@@ -102,8 +102,10 @@ public class RegistroController extends HttpServlet {
                         
                         usuario.setIdUsuario((short) (estadoRegistro * -1));
 
-                        pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
-                        lpdao.crearLineasPedido(pedido);
+                        if (Utilities.sumUnidadesCarrito(pedido.getListadoLineasPedido()) > 0){
+                            pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
+                            lpdao.crearLineasPedido(pedido);
+                        }
                         
                         request.getSession().removeAttribute("carrito");
                         Utilities.eliminarCookie(response);

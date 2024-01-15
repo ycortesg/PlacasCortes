@@ -18,73 +18,98 @@
         <script id="main" src="${applicationScope.javascript}registro.js" data-json-route="${applicationScope.path}JSON/provincias.json" defer type="module"></script>
         <title>Registro</title>
     </head>
-    <body class="vh-100 d-flex align-items-center justify-content-center flex-column">
-        <c:if test="${request.aviso != null}">
+    <body class="vh-100 d-flex align-items-center justify-content-center overflow-hidden">
+        <c:if test="${requestScope.aviso != null}">
             <jsp:include page="JSP/INCLUDES/avisos.jsp">
-                <jsp:param name="error" value="${sessionScope.error != null}"/>
-                <jsp:param name="mensaje" value="${sessionScope.aviso}"/>
+                <jsp:param name="error" value="${requestScope.error != null}"/>
+                <jsp:param name="mensaje" value="${requestScope.aviso}"/>
             </jsp:include>
         </c:if>
-        <h1>Registro</h1>
+        <div class="circulo-fondo"></div>
+        <main class="w-75 p-4 bg-white shadow-lg d-flex align-items-center justify-content-center flex-column rounded-4 overflow-auto">
 
-        <form method="POST" action="RegistroController">
-            <div class="form-group">
-                <label for="nombre">Nombre:</label>
-                <input name="nombre" type="text" class="form-control" id="nombre" pattern="\S+.*" required>
-            </div>
-            <div class="form-group">
-                <label for="apellidos">Apellidos:</label>
-                <input name="apellidos" type="text" class="form-control" id="apellidos" pattern="\S+.*\s+\S+.*" required
-                       oninvalid="this.setCustomValidity('Dos palabras separadas por espacio')"
-                       oninput="this.setCustomValidity('')">
-            </div>
-            <div class="form-group">
-                <label for="telefono">Número de teléfono:</label>
-                <input name="telefono" type="tel" class="form-control" id="telefono" pattern="^(9|8|7|6)\\d{8}$" required
-                       oninvalid="this.setCustomValidity('9 digitos que empieza por 9, 8, 7 o 6')"
-                       oninput="this.setCustomValidity('')">
-            </div>
-            <div class="form-group">
-                <label for="nif">NIF:</label>
-                <input name="NIF" type="text" class="form-control" id="nif" pattern="[0-9]{8}" required
-                       oninvalid="this.setCustomValidity('8 digitos')"
-                       oninput="this.setCustomValidity('')">
-                <input readonly name="letraNIF" id="letraNIF">
-            </div>
-            <div class="form-group">
-                <label for="direccion">Dirección:</label>
-                <input name="direccion" type="text" class="form-control" id="direccion" pattern="\S+.*" required>
-            </div>
-            <div class="form-group">
-                <label for="codigoPostal">Código postal:</label>
-                <input name="codigoPostal" type="text" class="form-control" id="codigoPostal" required
-                       oninvalid="this.setCustomValidity('5 digitos válidos')"
-                       oninput="this.setCustomValidity('')">
-            </div>
-            <div class="form-group">
-                <label for="provincia">Provincia:</label>
-                <input name="provincia" type="text" class="form-control" id="provincia" readonly pattern="\S+.*" required>
-            </div>
-            <div class="form-group">
-                <label for="localidad">Localidad:</label>
-                <input name="localidad" type="text" class="form-control" id="localidad" pattern="\S+.*" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Correo electrónico:</label>
-                <input name="email" type="email" class="form-control" id="email" required
-                       oninvalid="this.setCustomValidity('Correo electrónico válido')"
-                        oninput="this.setCustomValidity('')">
-            </div>
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input name="password" type="password" class="form-control" id="password" required>
-            </div>
-            <div class="form-group">
-                <label for="password2">Repite la contraseña:</label>
-                <input type="password" class="form-control" id="password2" required>
-            </div>
-            <button type="submit" name="opcion" value="registrate" class="btn btn-primary" disabled id="btnRegistro">Registrate</button>
-            <button type="submit" name="opcion" value="volver" class="btn btn-primary" formnovalidate>Volver</button>
-        </form>
+            <h1 class="text-success">Registro</h1>
+
+            <form name="form" method="POST" action="RegistroController" class="row g-3 needs-validation" novalidate oninput='password2.setCustomValidity(password2.value != password.value ? "La password no es igual" : "")'>
+                <div class="col-md-4">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required pattern="\S+.*" />
+                    <div class="invalid-feedback">Introduce tu nombre</div>
+                </div>
+                <div class="col-md-8">
+                    <label for="apellidos" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control" id="apellidos" name="apellidos" required pattern="\S+.*\s+\S+.*" />
+                    <div class="invalid-feedback">Introduce tus apellidos</div>
+                </div>
+
+                <div class="col-md-8 ">
+                    <label for="nif" class="form-label">NIF</label>
+                    <div class="input-group has-validation">
+                        <input type="text" class="form-control" id="nif" name="NIF" pattern="[0-9]{8}"
+                               aria-describedby="inputGroupPrepend" required />
+                        <input style="width: 5rem" readonly required name="letraNIF" id="letraNIF" class="input-group-text" />
+                        <div class="invalid-feedback">Introduce un NIF válido</div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="telefono" class="form-label">Número de teléfono</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono" required
+                           pattern="^(9|8|7|6)[0-9]{8}$" />
+                    <div class="invalid-feedback">
+                        Introduce un número de telefono válido
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" required
+                           pattern="^\S+.*" />
+                    <div class="invalid-feedback">Introduce una dirección válida</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="codigoPostal" class="form-label">Código postal</label>
+                    <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" required
+                           pattern="^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$" />
+                    <div class="invalid-feedback">Introduce un código postal válido</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="provincia" class="form-label">Provincia</label>
+                    <input type="text" class="form-control" id="provincia" name="provincia" required readonly />
+                    <div class="invalid-feedback">Introduce un código postal válido</div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="localidad" class="form-label">Localidad</label>
+                    <input type="text" class="form-control" id="localidad" name="localidad" required pattern="\S+.*" />
+                    <div class="invalid-feedback">Introduce tu localidad</div>
+                </div>
+                <div class="col-md-8">
+                    <label for="email" class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" id="email" name="email" required />
+                    <div class="invalid-feedback">Introduce un correo electrónico valido</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="password" required/>
+                    <div class="invalid-feedback">Introduce una contraseña válida</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="password2" class="form-label">Repite la contraseña</label>
+                    <input type="password" class="form-control" id="password2" name="password2" required  />
+                    <div class="invalid-feedback">Repite la contraseña</div>
+                </div>
+                <div class="col-md-12 d-flex align-items-center justify-content-center">
+                    <div class="col-md-6 d-flex align-items-center justify-content-center">
+                        <button type="submit" name="opcion" value="registrate" class="btn btn-primary col-md-6 bg-success" id="btnRegistro">Registrate</button>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-center justify-content-center">
+                        <button id="btnVolver" type="submit" name="opcion" value="volver" class="btn btn-primary col-md-6 bg-success">Volver</button>
+                    </div>
+                </div>
+            </form>
+        </main>
     </body>
 </html>

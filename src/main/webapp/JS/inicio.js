@@ -4,8 +4,8 @@ const url = "Ajax";
 
 let burbujaCarrito = document.querySelector("span#burbujaCarrito b");
 let buscador = document.querySelector("#buscador");
-let selectCategorias = document.querySelector("#categorias");
-let selectMarcas = document.querySelector("#marcas");
+let burbujaCategorias = document.querySelector("span#burbujaCategorias");
+let burbujaMarcas = document.querySelector("span#burbujaMarcas");
 
 let modalInicioSesion = document.querySelector("#modalInicioDeSesion");
 let modalProducto = document.querySelector("#modalProducto");
@@ -26,7 +26,6 @@ let botonEliminarProductoDeCarrito = modalProducto.querySelector("button#elimina
 let botonInicioSesion = document.querySelector("button#inicioSesion");
 let containerProductos = document.querySelector("#containerProductos");
 
-let partesURL = modalProductoImagenProducto.src.split('/');
 const defaultURLProducto = document.querySelector("script#main").getAttribute("data-productos-route"); 
 const defaultURLCategoria = document.querySelector("script#main").getAttribute("data-categorias-route"); 
 
@@ -65,20 +64,20 @@ function mandarFiltro() {
             respuesta.forEach((producto) => {
                 containerProductos.innerHTML += `
 <div class="col-lg-4 col-md-6 mb-3 mb-lg-0 card-product gap-2" id=\"${producto.idProducto}\" role="button" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <div class="card rounded shadow-sm border-0">
-                            <div class="card-body p-4">
-                                <img src="${defaultURLProducto}/${producto.imagenProducto}.jpg" alt="${producto.nombreProducto}" class="img-fluid d-block mx-auto mb-3 img-producto">
-                                <div class="d-flex align-items-center justify-content-between w-100">
-                                    <div class="d-flex align-items-start flex-column w-75 ">
-                                        <h5 class="fs-6">${producto.nombreProducto}</h5>
-                                        <h4 class="fw-bolder ">${formateoMoneda.format(producto.precio)}</h4>
-                                        <h5>${producto.marca}</h5>
-                                    </div>
-                                    <img src="${defaultURLCategoria}${producto.imagenCategoria}" alt="${producto.imagenCategoria}" id="imagenCategoriaCarta" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="card rounded shadow-sm border-0">
+        <div class="card-body p-4">
+            <img src="${defaultURLProducto}/${producto.imagenProducto}.jpg" alt="${producto.nombreProducto}" class="img-fluid d-block mx-auto mb-3 img-producto">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <div class="d-flex align-items-start flex-column w-75 ">
+                    <h5 class="fs-6">${producto.nombreProducto}</h5>
+                    <h4 class="fw-bolder ">${formateoMoneda.format(producto.precio)}</h4>
+                    <h5>${producto.marca}</h5>
+                </div>
+                <img src="${defaultURLCategoria}${producto.imagenCategoria}" alt="${producto.imagenCategoria}" id="imagenCategoriaCarta" class="img-fluid d-block mx-auto mb-3 h-100 w-25 p-3">
+            </div>
+        </div>
+    </div>
+</div>
 `;
             });
             controlarErroresImagen();
@@ -87,8 +86,8 @@ function mandarFiltro() {
     };
 
     request.send(`accion=buscador&arreglo=${JSON.stringify([
-        Array.from(selectCategorias.selectedOptions).map(option => option.value),
-        Array.from(selectMarcas.selectedOptions).map(option => option.value),
+        Array.from(document.querySelectorAll("input[name='categorias']")).filter(e=>e.checked).map(seleccionados=>seleccionados.value),
+        Array.from(document.querySelectorAll("input[name='marcas']")).filter(e=>e.checked).map(seleccionados=>seleccionados.value),
         [buscador.value.replace(" ", "").length > 3 ? buscador.value : ""]
     ]) }`);
 }
@@ -150,6 +149,29 @@ function eliminarEventListeners() {
     botonAnadirACarrito = botonAnadirACarritoClone;
 }
 
+function actualizarBurbujaCategorias(){
+    let numFiltrosCategorias = Array.from(document.querySelectorAll("input[name='categorias']")).filter(e=>e.checked).length;
+    
+    console.log(numFiltrosCategorias)
+    if (!burbujaCategorias.classList.contains("d-none") && numFiltrosCategorias === 0){
+        burbujaCategorias.classList.add("d-none");
+    } else if (burbujaCategorias.classList.contains("d-none") && numFiltrosCategorias > 0){
+        burbujaCategorias.classList.remove("d-none");
+    }
+    burbujaCategorias.querySelector("b").innerText = numFiltrosCategorias;
+}
+
+function actualizarBurbujaMarcas(){
+    let numFiltrosMarcas = Array.from(document.querySelectorAll("input[name='marcas']")).filter(e=>e.checked).length;
+    
+    if (!burbujaMarcas.classList.contains("d-none") && numFiltrosMarcas === 0){
+        burbujaMarcas.classList.add("d-none");
+    } else if (burbujaMarcas.classList.contains("d-none") && numFiltrosMarcas > 0){
+        burbujaMarcas.classList.remove("d-none");
+    }
+    burbujaMarcas.querySelector("b").innerText = numFiltrosMarcas;
+}
+
 function anadirEventosAProductos() {
     Array.from(containerProductos.querySelectorAll("div.card-product"))
             .forEach(e => {
@@ -206,14 +228,13 @@ buscador.addEventListener("keyup", (e) => {
     }
 });
 
-selectCategorias.addEventListener("click", () => {
-    console.log(Array.from(selectCategorias.selectedOptions).map(option => option.value));
-    mandarFiltro();
-});
-
-selectMarcas.addEventListener("click", () => {
-    console.log(Array.from(selectCategorias.selectedOptions).map(option => option.value));
-    mandarFiltro();
+Array.from(document.querySelectorAll("input[type=checkbox]"))
+        .forEach(e=>{
+            e.addEventListener("click", () => {
+                mandarFiltro();
+                if (e.name === "categorias") actualizarBurbujaCategorias();
+                else if (e.name === "marcas") actualizarBurbujaMarcas();
+            });
 });
 
 modalProductoImagenCategoria.addEventListener("error", () => {
@@ -231,3 +252,21 @@ if (botonInicioSesion) {
 
 controlarErroresImagen();
 anadirEventosAProductos();
+
+(function () {
+  'use strict';
+
+  let forms = document.querySelectorAll('.needs-validation');
+
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+
+        form.classList.add('was-validated');
+      }, false);
+    });
+})();

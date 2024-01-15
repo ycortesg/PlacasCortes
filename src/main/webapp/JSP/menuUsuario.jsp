@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="es">
     <head>
@@ -15,124 +16,195 @@
               crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="icon" type="image/x-icon" href="${applicationScope.imagenes}LOGOS/logo.ico">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>  
-        <script id="main" src="${applicationScope.javascript}menuUsuario.js" data-json-route="${applicationScope.path}JSON/provincias.json" defer type="module"></script>
+        <script id="main" src="${applicationScope.javascript}menuUsuario.js" data-json-route="${applicationScope.path}JSON/provincias.json" data-productos-route="${applicationScope.imagenes}PRODUCTOS/" defer type="module"></script>
         <title>Menu Usuario</title>
     </head>
-    <body class="d-flex align-items-center flex-column gap-3 vh-100">
-
-        <div class="modal fade" id="modalDatosPersonales" tabindex="-1" aria-labelledby="modalDatosPersonalesLabel" aria-hidden="true">
-            <div class="modal-dialog position-relative">
-                <div class="modal-content position-absolute" >
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalDatosPersonalesLabel">Datos personales</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="CuentaController">
-                            <div class="form-group">
-                                <label for="nombre">Nombre:</label>
-                                <input name="nombre" type="text" class="form-control" id="nombre" value="${sessionScope.usuarioEnSesion.nombre}" pattern="\S+.*" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="apellidos">Apellidos:</label>
-                                <input name="apellidos" type="text" class="form-control" id="apellidos" value="${sessionScope.usuarioEnSesion.apellidos}" pattern="\S+.*\s+\S+.*" required
-                                       oninvalid="this.setCustomValidity('Dos palabras separadas por espacio')"
-                                       oninput="this.setCustomValidity('')">
-                            </div>
-                            <div class="form-group">
-                                <label for="telefono">Número de teléfono:</label>
-                                <input name="telefono" type="tel" class="form-control" id="telefono" pattern="^(9|8|7|6)\\d{8}$" value="${sessionScope.usuarioEnSesion.telefono}" required
-                                       oninvalid="this.setCustomValidity('9 digitos que empieza por 9, 8, 7 o 6')"
-                                       oninput="this.setCustomValidity('')">
-                            </div>
-                            <div class="form-group">
-                                <label for="direccion">Dirección:</label>
-                                <input name="direccion" type="text" class="form-control" id="direccion" pattern="\S+.*" value="${sessionScope.usuarioEnSesion.direccion}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="codigoPostal">Código postal:</label>
-                                <input name="codigoPostal" type="text" class="form-control" id="codigoPostal" value="${sessionScope.usuarioEnSesion.codigoPostal}" required
-                                       oninvalid="this.setCustomValidity('5 digitos válidos')"
-                                       oninput="this.setCustomValidity('')">
-                            </div>
-                            <div class="form-group">
-                                <label for="provincia">Provincia:</label>
-                                <input name="provincia" type="text" class="form-control" id="provincia" readonly pattern="\S+.*" value="${sessionScope.usuarioEnSesion.provincia}" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="localidad">Localidad:</label>
-                                <input name="localidad" type="text" class="form-control" id="localidad" pattern="\S+.*" value="${sessionScope.usuarioEnSesion.localidad}" required>
-                            </div>
-                            <button type="submit" name="opcion" value="editarDatosPersonales" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm my-2">Actualizar</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalPassword" tabindex="-1" aria-labelledby="modalPasswordLabel" aria-hidden="true">
-            <div class="modal-dialog position-relative">
-                <div class="modal-content position-absolute" >
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalPasswordLabel">Contraseña</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="CuentaController">
-                            <div class="form-group">
-                                <label for="passwordAntigua">Contraseña antigua:</label>
-                                <input name="passwordAntigua" type="password" class="form-control" id="passwordAntigua" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="passwordNueva">Nueva contraseña:</label>
-                                <input type="password" name="passwordNueva" class="form-control" id="passwordNueva" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="passwordNueva2">Repite la nueva contraseña:</label>
-                                <input type="password" class="form-control" id="passwordNueva2" required>
-                            </div>
-                            <button type="button" name="opcion" value="editarPassword" disabled id="editarPassword" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm my-2">Actualizar</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="modalAvatar" tabindex="-1" aria-labelledby="modalAvatarLabel" aria-hidden="true">
-            <div class="modal-dialog position-relative">
-                <div class="modal-content position-absolute" >
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalAvatarLabel">Avatar</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="FrontController">
-                            <button type="submit" name="opcion" value="inicioSesion" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm my-2">Iniciar Sesion</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <c:if test="${request.aviso != null}">
-            <jsp:include page="JSP/INCLUDES/avisos.jsp">
-                <jsp:param name="error" value="${sessionScope.error != null}"/>
-                <jsp:param name="mensaje" value="${sessionScope.aviso}"/>
+    <body class="d-flex align-items-center justify-content-center flex-column gap-3 vh-100 menu-cuenta-usuario ">
+        
+        <c:if test="${requestScope.aviso != null}">
+            <jsp:include page="/JSP/INCLUDES/avisos.jsp">
+                <jsp:param name="error" value="${requestScope.error != null}"/>
+                <jsp:param name="mensaje" value="${requestScope.aviso}"/>
             </jsp:include>
         </c:if>
+        
+        <div class="modal fade" id="pedidoModal" tabindex="-1" aria-labelledby="pedidoModalLabel" aria-hidden="true">
+            <div class="modal-dialog position-relative ">
+                <div class="modal-content" id="modalPedido">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="pedidoModalLabel">Información pedido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped" id="tablaPedido">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Imagen</th>
+                                    <th scope="col">Nombre</th>
+                                    <th scope="col">Precio</th>
+                                    <th scope="col">Unidades</th>
+                                </tr>
+                            </thead>
+                            <tbody id="0">
 
-        <h1>Menu Usuario</h1>
-        <main class="d-flex align-items-center justify-content-center">
-            <div class="d-flex align-items-center justify-content-start gap-3 flex-column">
-                <h2>Editar datos</h2>
-                <button type="button" data-bs-toggle="modal" data-bs-target="#modalDatosPersonales" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm">Datos personales</button>
-                <button id="botonModalPassword" type="button" data-bs-toggle="modal" data-bs-target="#modalPassword" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm">Contraseña</button>
-                <button type="button" data-bs-toggle="modal" data-bs-target="#modalAvatar" class="bg-light p-2 rounded-4 border-login px-3 shadow-sm">Avatar</button>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="d-flex align-items-center justify-content-start flex-column">
-                <form action="CuentaController" method="POST"><button type="submit" name="opcion" value="visualizarPedidosFinalizados">Visualizar pedidos finalizados</button></form>
+        </div>
+        
+        <c:set value="justify-content-center" var="contenidoCentrado" ></c:set>
+        <c:if test="${fn:length(fechasPedidos) > 0}">
+            <c:set value="justify-content-between" var="contenidoCentrado" ></c:set>
+        </c:if>
+
+        <main class="d-flex align-items-center ${contenidoCentrado} flex-column rounded-4 h-75 w-75">
+            <form action="CuentaController" method="POST"><button type="submit"  class="btn btn-primary bg-success" name="opcion" value="volver">Inicio</button></form>
+            <h1>Menu Usuario</h1>
+            <div class="d-flex align-items-center ${contenidoCentrado} w-100 h-75">
+                <div class="d-flex align-items-center justify-content-start gap-3 flex-column h-100">
+                    <h2>Editar datos</h2>
+                    <div class="accordion" id="accordionActualizarDatos">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Datos personales
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse " aria-labelledby="headingOne" data-bs-parent="#accordionActualizarDatos">
+                                <div class="accordion-body position-relative p-0 m-0">
+                                    <form name="form" method="POST" action="CuentaController" class="py-3 m-0 row g-3 needs-validation top-0 start-0" novalidate>
+                                        <div class="col-md-12">
+                                            <label for="nombre" class="form-label">Nombre:</label>
+                                            <input name="nombre" type="text" class="form-control" id="nombre" value="${sessionScope.usuarioEnSesion.nombre}" pattern="\S+.*" required>
+                                            <div class="invalid-feedback">Introduce tu nombre</div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label for="apellidos" class="form-label">Apellidos</label>
+                                            <input type="text" class="form-control" id="apellidos" name="apellidos" value="${sessionScope.usuarioEnSesion.apellidos}" required pattern="\S+.*\s+\S+.*" />
+                                            <div class="invalid-feedback">Introduce tus apellidos</div>
+                                        </div>
+
+                                        <div class="col-md-12 ">
+                                            <label for="telefono" class="form-label">Número de teléfono</label>
+                                            <input type="text" class="form-control" id="telefono" name="telefono" value="${sessionScope.usuarioEnSesion.telefono}" required
+                                                   pattern="^(9|8|7|6)[0-9]{8}$" />
+                                            <div class="invalid-feedback">
+                                                Introduce un número de telefono válido
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label for="direccion" class="form-label">Dirección</label>
+                                            <input type="text" class="form-control" id="direccion" name="direccion" value="${sessionScope.usuarioEnSesion.direccion}" required
+                                                   pattern="^\S+.*" />
+                                            <div class="invalid-feedback">Introduce una dirección válida</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="codigoPostal" class="form-label">Código postal</label>
+                                            <input type="text" class="form-control" id="codigoPostal" name="codigoPostal" value="${sessionScope.usuarioEnSesion.codigoPostal}" required
+                                                   pattern="^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$" />
+                                            <div class="invalid-feedback">Introduce un código postal válido</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="provincia" class="form-label">Provincia</label>
+                                            <input type="text" class="form-control" id="provincia" name="provincia" value="${sessionScope.usuarioEnSesion.provincia}" required readonly />
+                                            <div class="invalid-feedback">Introduce un código postal válido</div>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label for="localidad" class="form-label">Localidad</label>
+                                            <input type="text" class="form-control" id="localidad" name="localidad" value="${sessionScope.usuarioEnSesion.localidad}" required pattern="\S+.*" />
+                                            <div class="invalid-feedback">Introduce tu localidad</div>
+                                        </div>
+                                        <div class="col-md-12 d-flex align-items-center justify-content-between" id="containerBotones">
+                                            <button id="actualizarDatosPersonales" type="submit" value="actualizarDatosPersonales" name="opcion" class="btn btn-primary no-confirmado col-md-12">Actualizar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Contraseña
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionActualizarDatos">
+
+                                <div class="accordion-body position-relative p-0 m-0">
+                                    <form name="form" method="POST" action="CuentaController" class="row px-4 g-3 needs-validation top-0 start-0 py-3 m-0" novalidate 
+                                          oninput='password2.setCustomValidity(password2.value != password.value ? "La password no es igual" : "");
+                                          password.setCustomValidity(password.value == passwordOld.value ? "Tiene que ser una password nueva" : "")'>
+
+                                        <div class="col-md-12">
+                                            <label for="passwordOld" class="form-label">Contraseña antigua</label>
+                                            <input type="password" class="form-control" id="passwordOld" name="passwordOld" required/>
+                                            <div class="invalid-feedback">Introduce una contraseña válida</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="password" class="form-label">Contraseña nueva</label>
+                                            <input type="password" class="form-control" id="password" name="password" required  />
+                                            <div class="invalid-feedback">Repite la contraseña</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="password2" class="form-label">Repite la contraseña nueva</label>
+                                            <input type="password" class="form-control" id="password2" name="password2" required  />
+                                            <div class="invalid-feedback">Repite la contraseña</div>
+                                        </div>
+                                        <div class="col-md-12 d-flex align-items-center justify-content-between" id="containerBotones">
+
+                                            <button id="actualizarPassword" type="submit" value="actualizarPassword" name="opcion" class="btn btn-primary no-confirmado col-md-12">Actualizar</button>
+                                        </div>
+
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Avatar
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionActualizarDatos">
+                                <div class="accordion-body d-flex align-items-center justify-content-between">
+                                    
+                                    <img src="${applicationScope.imagenes}AVATARS/${sessionScope.usuarioEnSesion.avatar}" width="120" height="120" alt="alt"/>
+                                    
+                                    <form  name="form" action="CuentaController" class="row g-3" method="POST" enctype="multipart/form-data">
+                                        <div class="col-md-12">
+                                            <label for="avatar" class="form-label">Avatar nuevo (png o jpg como máximo 100KB)</label>
+                                            <input type="file" class="form-control" id="avatar" name="avatar" required  />
+                                        </div>
+                                        <div class="col-md-12 d-flex align-items-center justify-content-between" id="containerBotones">
+                                            <button id="actualizarAvatar" type="submit" value="actualizarAvatar" name="opcion" class="btn btn-primary no-confirmado col-md-12">Actualizar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <c:if test="${fn:length(fechasPedidos) > 0}">
+
+                    <div class="d-flex align-items-center justify-content-start flex-column  h-100">
+                        <h2>Compras realizadas</h2>
+                        <select id="fechasPedidos" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+                            <option selected disabled>Seleccciona una fecha</option>
+                            <c:forEach var="fecha" items="${fechasPedidos}">
+                                <option value="${fecha}">${fecha}</option>
+                            </c:forEach>
+                        </select>
+                        <div class="d-flex align-items-center justify-content-center flex-column w-100" id="listaPedidos">
+                        </div>
+                    </div>
+                </c:if>
             </div>
         </main>
-        <form action="CuentaController" method="POST"><button type="submit" name="opcion" value="volver">Volver</button></form>
     </body>
 </html>

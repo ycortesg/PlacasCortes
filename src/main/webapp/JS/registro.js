@@ -11,7 +11,7 @@ let botonEnvio = document.querySelector("#btnRegistro");
 const url = "Ajax";
 const rutaJSONProvincias = document.querySelector("script#main").getAttribute("data-json-route");
 
-let listaCamposValidos = [false, false, false, false];
+let listaCamposValidos = [false, false, false];
 
 let letrasDNI = ['T', 'R', 'W', 'A', 'G', 'M', 'Y', 'F', 'P', 'D', 'X', 'B', 'N', 'J', 'Z', 'S', 'Q', 'V', 'H', 'L', 'C', 'K', 'E'];
 
@@ -19,8 +19,7 @@ let codigosPostal;
 
 let regex = {
     nif: /^[0-9]{8}$/,
-    codigoPostal: /^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$/,
-    email: /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
+    codigoPostal: /^(0[1-9]|[1-4][0-9]|5[0-2])[0-9]{3}$/
 };
 
 async function cargarProvincias() {
@@ -47,8 +46,9 @@ function checkCodigoPostalInput() {
     }
 }
 
-function checkEmailInput() {
-    if (regex.email.test(inputEmail.value)) {
+
+function checkEmailInput(valido) {
+    if (valido) {
         let request = new XMLHttpRequest();
 
         request.open('POST', url, true);
@@ -58,8 +58,16 @@ function checkEmailInput() {
             if (request.readyState === 4 && request.status === 200) {
                 let respuesta = JSON.parse(e.currentTarget.responseText);
                 listaCamposValidos[2] = respuesta.correoValido;
-                checkInputsValidos();
                 console.log(respuesta);
+                if (document.querySelector(".needs-validation").classList.contains("was-validated")){
+                    if (respuesta.correoValido){
+                        if (!inputEmail.classList.contains("is-valid"))inputEmail.classList.add("is-valid");
+                        if (inputEmail.classList.contains("is-invalid"))inputEmail.classList.remove("is-invalid");
+                    }else{
+                        if (inputEmail.classList.contains("is-valid"))inputEmail.classList.remove("is-valid");
+                        if (!inputEmail.classList.contains("is-invalid"))inputEmail.classList.add("is-invalid");
+                    }
+                }
             }
         };
         request.send(`accion=correoExistente&arreglo=${JSON.stringify(inputEmail.value)}`);
@@ -68,54 +76,51 @@ function checkEmailInput() {
     }
 }
 
-function checkPasswordInput() {
-    listaCamposValidos[3] = inputPassword.value === inputPassword2.value;
-}
-
 function checkInputsValidos() {
-    botonEnvio.disabled = !(listaCamposValidos.every(e => e) && Array.from(document.querySelectorAll("input")).every(e => e.value !== ""));
+    return (listaCamposValidos.every(e => e) && Array.from(document.querySelectorAll("input")).every(e => e.value !== ""));
 }
 
 cargarProvincias().then(() => {
 
     inputNIF.addEventListener("keyup", () => {
         checkNIFInput();
-        checkInputsValidos();
     });
 
     inputCodigoPostal.addEventListener("keyup", () => {
         checkCodigoPostalInput();
-        checkInputsValidos();
     });
 
     inputEmail.addEventListener("blur", () => {
-        console.log(inputEmail.value);
-        checkEmailInput();
-        checkInputsValidos();
+        checkEmailInput(inputEmail.checkValidity());
+                
     });
-
-    inputPassword.addEventListener("keyup", () => {
-        checkPasswordInput();
-        checkInputsValidos();
-    });
-
-    inputPassword2.addEventListener("keyup", () => {
-        checkPasswordInput();
-        checkInputsValidos();
-    });
-
-    Array.from(document.querySelectorAll("input"))
-            .forEach((e) => {
-                e.addEventListener("keyup", () => {
-                    checkInputsValidos();
-                });
-            });
 
     checkNIFInput();
     checkCodigoPostalInput();
     checkEmailInput();
-    checkPasswordInput();
-    checkInputsValidos();
 
+    (function () {
+        "use strict";
+
+        let forms = document.querySelectorAll(".needs-validation");
+
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener(
+                    "submit",
+                    function (event) {
+                        if (event.submitter.value !== "volver") {
+                            console.log(!form.checkValidity() || !checkInputsValidos());
+                            if (!form.checkValidity() || !checkInputsValidos()) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add("was-validated");
+                        }
+
+                    },
+                    false
+                    );
+        });
+    })();
 
 });

@@ -15,6 +15,9 @@ public interface IUsuarioDAO{
     public Usuario usuarioEsValido(Usuario usuario);
     public Usuario anadirDetallesAUsuario(Usuario usuario);
     public Short registrarUsuario(Usuario usuario);
+    public Short actualizarDatosPersonalesUsuario(Usuario usuario);
+    public Short actualizarPasswordUsuario(Usuario usuario, String passwordNueva);
+    public void actualizarAvatar(Usuario usuario);
     public void actualizarUltimoAcceso(Short idUsuario);
     public void closeConnection();
 }

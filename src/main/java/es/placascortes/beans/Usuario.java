@@ -6,6 +6,7 @@ package es.placascortes.beans;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.Objects;
 
 /**
  *
@@ -129,4 +130,75 @@ public class Usuario implements Serializable{
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + Objects.hashCode(this.idUsuario);
+        hash = 67 * hash + Objects.hashCode(this.email);
+        hash = 67 * hash + Objects.hashCode(this.password);
+        hash = 67 * hash + Objects.hashCode(this.nombre);
+        hash = 67 * hash + Objects.hashCode(this.apellidos);
+        hash = 67 * hash + Objects.hashCode(this.NIF);
+        hash = 67 * hash + Objects.hashCode(this.telefono);
+        hash = 67 * hash + Objects.hashCode(this.direccion);
+        hash = 67 * hash + Objects.hashCode(this.codigoPostal);
+        hash = 67 * hash + Objects.hashCode(this.localidad);
+        hash = 67 * hash + Objects.hashCode(this.provincia);
+        hash = 67 * hash + Objects.hashCode(this.ultimoAcceso);
+        hash = 67 * hash + Objects.hashCode(this.avatar);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Usuario other = (Usuario) obj;
+        if (!Objects.equals(this.email, other.email)) {
+            return false;
+        }
+        if (!Objects.equals(this.password, other.password)) {
+            return false;
+        }
+        if (!Objects.equals(this.nombre, other.nombre)) {
+            return false;
+        }
+        if (!Objects.equals(this.apellidos, other.apellidos)) {
+            return false;
+        }
+        if (!Objects.equals(this.NIF, other.NIF)) {
+            return false;
+        }
+        if (!Objects.equals(this.telefono, other.telefono)) {
+            return false;
+        }
+        if (!Objects.equals(this.direccion, other.direccion)) {
+            return false;
+        }
+        if (!Objects.equals(this.codigoPostal, other.codigoPostal)) {
+            return false;
+        }
+        if (!Objects.equals(this.localidad, other.localidad)) {
+            return false;
+        }
+        if (!Objects.equals(this.provincia, other.provincia)) {
+            return false;
+        }
+        if (!Objects.equals(this.avatar, other.avatar)) {
+            return false;
+        }
+        if (!Objects.equals(this.idUsuario, other.idUsuario)) {
+            return false;
+        }
+        return Objects.equals(this.ultimoAcceso, other.ultimoAcceso);
+    }
+    
 }

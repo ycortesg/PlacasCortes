@@ -14,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -169,6 +171,121 @@ public class PedidoDAO implements IPedidoDAO {
         } finally {
             this.closeConnection();
         }
+    }
+
+    @Override
+    public List<String> getFechasPedidos(Short idUsuario) {
+        ResultSet resultado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "select distinct fecha from pedidos where idUsuario = ? and estado = \'f\'";
+        List<String> listadoFechas = null;
+        
+        try {
+            // creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            // Llenamos la sentencia preparada con los datos introducidos
+            sentenciaPreparada.setShort(1, idUsuario);
+
+            // Recogemos el resultado
+            resultado = sentenciaPreparada.executeQuery();
+            
+            listadoFechas = new ArrayList<>();
+            while (resultado.next()) {
+                listadoFechas.add(resultado.getString("fecha"));
+            }
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+
+        return listadoFechas;    
+    }
+
+    @Override
+    public List<Pedido> getPedidosDeFechaYUsuario(Short idUsuario, Date fecha) {
+        ResultSet resultado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "select idPedido, importe, iva from pedidos where idUsuario = ? and fecha = ?";
+        List<Pedido> listadoPedidosDeFecha = null;
+        Pedido pedido = null;
+        try {
+            // creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            // Llenamos la sentencia preparada con los datos introducidos
+            sentenciaPreparada.setShort(1, idUsuario);
+            sentenciaPreparada.setDate(2, new java.sql.Date(fecha.getTime()));
+
+            // Recogemos el resultado
+            resultado = sentenciaPreparada.executeQuery();
+            
+            listadoPedidosDeFecha = new ArrayList<>();
+            while (resultado.next()) {
+                pedido = new Pedido();
+
+                pedido.setIdPedido(resultado.getShort("idPedido"));
+                pedido.setImporte(resultado.getFloat("importe"));
+                pedido.setIva(resultado.getFloat("iva"));
+
+                listadoPedidosDeFecha.add(pedido);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+
+        return listadoPedidosDeFecha;
+    }
+
+    @Override
+    public Pedido getPedidoFinalizadoPorId(Short idPedido) {
+        ResultSet resultado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "select productos.nombre, productos.precio, productos.imagen, lineaspedidos.cantidad from lineaspedidos inner join pedidos on lineaspedidos.idPedido = pedidos.idPedido inner join productos on lineaspedidos.idProducto = productos.idProducto where pedidos.idPedido = ?";
+        Pedido pedidoFinalizao = null;
+        LineaPedido lineaPedido = null;
+        Producto producto = null;
+        try {
+            // creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            sentenciaPreparada = conexion.prepareStatement(sql);
+
+            // Llenamos la sentencia preparada con los datos introducidos
+            sentenciaPreparada.setShort(1, idPedido);
+
+            // Recogemos el resultado
+            resultado = sentenciaPreparada.executeQuery();
+            pedidoFinalizao = new Pedido();
+            pedidoFinalizao.setListadoLineasPedido(new ArrayList<>());
+            while (resultado.next()) {
+                lineaPedido = new LineaPedido();
+                producto = new Producto();
+
+                producto.setNombre(resultado.getString("nombre"));
+                producto.setPrecio(resultado.getFloat("precio"));
+                producto.setImagen(resultado.getString("imagen"));
+                lineaPedido.setCantidad(resultado.getByte("cantidad"));
+
+                lineaPedido.setProducto(producto);
+
+                pedidoFinalizao.getListadoLineasPedido().add(lineaPedido);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+
+        return pedidoFinalizao;
     }
     
     @Override

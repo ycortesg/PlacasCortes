@@ -6,11 +6,12 @@ package es.placascortes.DAO;
 
 import es.placascortes.beans.Usuario;
 import java.sql.Connection;
-import java.sql.Date;
+import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 /**
  *
@@ -55,9 +56,7 @@ public class UsuarioDAO implements IUsuarioDAO {
         Short estado = -1;
 
         PreparedStatement sentenciaPreparada = null;
-        String sql = usuario.getAvatar() == null
-                ? "insert into usuarios (email, password, nombre, apellidos, NIF, telefono, direccion, codigoPostal, localidad, provincia) values (?, md5(?), ?, ?, ?, ?, ?, ?, ?, ?)"
-                : "insert into usuarios (email, password, nombre, apellidos, NIF, telefono, direccion, codigoPostal, localidad, provincia, avatar) values (?, md5(?), ?, ? ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "insert into usuarios (email, password, nombre, apellidos, NIF, telefono, direccion, codigoPostal, localidad, provincia) values (?, md5(?), ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection conexion = ConnectionFactory.getConnection();
             conexion.setAutoCommit(false);
@@ -73,10 +72,6 @@ public class UsuarioDAO implements IUsuarioDAO {
             sentenciaPreparada.setString(8, usuario.getCodigoPostal());
             sentenciaPreparada.setString(9, usuario.getLocalidad());
             sentenciaPreparada.setString(10, usuario.getProvincia());
-
-            if (usuario.getAvatar() != null) {
-                sentenciaPreparada.setString(11, usuario.getAvatar());
-            }
 
             sentenciaPreparada.executeUpdate();
             resultado = sentenciaPreparada.getGeneratedKeys();
@@ -170,15 +165,109 @@ public class UsuarioDAO implements IUsuarioDAO {
         // Declaramos variables
         PreparedStatement sentenciaPreparada = null;
         String sql = "update usuarios set ultimoAcceso = ? where idUsuario = ?";
+        Date fechaActual = null;
+        Timestamp sqlDate = null;
         try {
             // Creamos conexion y sentencia
             Connection conexion = ConnectionFactory.getConnection();
             conexion.setAutoCommit(false);
             sentenciaPreparada = conexion.prepareStatement(sql);
 
+            fechaActual = new Date();
+            sqlDate = new Timestamp(fechaActual.getTime());
+            
             // Llenamos la sentencia preparada con los datos requeridos
-            sentenciaPreparada.setDate(1, new Date(new java.util.Date().getTime()));
+            sentenciaPreparada.setTimestamp(1, sqlDate);
             sentenciaPreparada.setShort(2, idUsuario);
+
+            sentenciaPreparada.executeUpdate();
+            conexion.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            this.closeConnection();
+        }
+    }
+
+    @Override
+    public Short actualizarDatosPersonalesUsuario(Usuario usuario) {
+        Short estado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "update usuarios set nombre = ?, apellidos = ?, telefono = ?, direccion = ?, codigoPostal = ?, provincia = ?, localidad = ? where idUsuario = ?";
+        
+        try {
+            Connection conexion = ConnectionFactory.getConnection();
+            conexion.setAutoCommit(false);
+            sentenciaPreparada = conexion.prepareStatement(sql);
+            
+            sentenciaPreparada.setString(1, usuario.getNombre());
+            sentenciaPreparada.setString(2, usuario.getApellidos());
+            sentenciaPreparada.setString(3, usuario.getTelefono());
+            sentenciaPreparada.setString(4, usuario.getDireccion());
+            sentenciaPreparada.setString(5, usuario.getCodigoPostal());
+            sentenciaPreparada.setString(6, usuario.getProvincia());
+            sentenciaPreparada.setString(7, usuario.getLocalidad());
+            
+            sentenciaPreparada.setShort(8, usuario.getIdUsuario());
+
+            sentenciaPreparada.executeUpdate();
+            conexion.commit();
+            estado = -1;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            estado = (short) e.getErrorCode();
+        } finally {
+            this.closeConnection();
+        }
+
+        return estado;
+    }
+
+    @Override
+    public Short actualizarPasswordUsuario(Usuario usuario, String passwordNueva) {
+        Short estado = null;
+
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "update usuarios set password = md5(?) where idUsuario = ?";
+        
+        try {
+            Connection conexion = ConnectionFactory.getConnection();
+            conexion.setAutoCommit(false);
+            sentenciaPreparada = conexion.prepareStatement(sql);
+            
+            sentenciaPreparada.setString(1, passwordNueva);
+            sentenciaPreparada.setShort(2, usuario.getIdUsuario());
+
+            sentenciaPreparada.executeUpdate();
+            conexion.commit();
+            estado = -1;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            estado = (short) e.getErrorCode();
+        } finally {
+            this.closeConnection();
+        }
+
+        return estado;    
+    }
+    
+    @Override
+    public void actualizarAvatar(Usuario usuario) {
+        // Declaramos variables
+        PreparedStatement sentenciaPreparada = null;
+        String sql = "update usuarios set avatar = ? where idUsuario = ?";
+        try {
+            // Creamos conexion y sentencia
+            Connection conexion = ConnectionFactory.getConnection();
+            conexion.setAutoCommit(false);
+            sentenciaPreparada = conexion.prepareStatement(sql);
+            
+            // Llenamos la sentencia preparada con los datos requeridos
+            sentenciaPreparada.setString(1, usuario.getAvatar());
+            sentenciaPreparada.setShort(2, usuario.getIdUsuario());
 
             sentenciaPreparada.executeUpdate();
             conexion.commit();

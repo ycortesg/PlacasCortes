@@ -18,6 +18,7 @@ import es.placascortes.beans.Usuario;
 import es.placascortes.utilities.Utilities;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -62,27 +63,26 @@ public class Ajax extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        Map map = request.getParameterMap();
+        // Declaramos variables
         String accion = request.getParameter("accion");
         JSONObject objeto = null;
         JSONArray arrayJSON = null;
         List listadoProdusctosFiltrados = null;
+        List listadoPedidos = null;
 
         Usuario usuario = null;
         Producto producto = null;
         Pedido pedido = null;
         LineaPedido lineaPedido = null;
 
-        DAOFactory daof = new MySQLDAOFactory();
         String correoElectronico = null;
         Boolean correoValido = null;
-        String aviso = null;
         Gson g = null;
 
-        
         Byte cantidadProductoEnCarrito = null;
-        
-        Short estado = null;
+
+        Date fechaPedido = null;
+
         Short idPedido = null;
 
         Integer productosEnCarrito = null;
@@ -91,11 +91,12 @@ public class Ajax extends HttpServlet {
         Float diferenciaDeIVA = null;
 
         Short idProducto = null;
-        List retornoObj = null;
         Iterator<Producto> iteratorProducto = null;
         Iterator<LineaPedido> iteratorLineaPedido = null;
+        Iterator<Pedido> iteratorPedido = null;
         HttpSession sesion = null;
 
+        DAOFactory daof = null;
         IUsuarioDAO udao = null;
         IProductoDAO pdao = null;
         IPedidoDAO pedao = null;
@@ -108,6 +109,7 @@ public class Ajax extends HttpServlet {
 
                 arrayJSON = new JSONArray();
 
+                daof = new MySQLDAOFactory();
                 pdao = daof.getProductoDAO();
                 listadoProdusctosFiltrados = pdao.getProductosFiltrados(buscadorArr);
 
@@ -135,6 +137,7 @@ public class Ajax extends HttpServlet {
                 g = new Gson();
                 idProducto = g.fromJson(request.getParameter("arreglo"), Short.class);
 
+                daof = new MySQLDAOFactory();
                 pdao = daof.getProductoDAO();
                 producto = pdao.getProductoDetallesPorId(idProducto);
 
@@ -155,6 +158,7 @@ public class Ajax extends HttpServlet {
                 g = new Gson();
                 correoElectronico = g.fromJson(request.getParameter("arreglo"), String.class);
 
+                daof = new MySQLDAOFactory();
                 udao = daof.getUsuarioDAO();
                 correoValido = udao.correoEsValido(correoElectronico);
 
@@ -181,7 +185,7 @@ public class Ajax extends HttpServlet {
                     pedido = new Pedido();
                     pedido.setListadoLineasPedido(new ArrayList());
                 }
-                
+
                 cantidadProductoEnCarrito = Utilities.accionesCarrito(
                         sesion,
                         idProducto,
@@ -190,23 +194,25 @@ public class Ajax extends HttpServlet {
 
                 if (Utilities.usuarioEstaEnSesion(sesion)) {
                     usuario = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
+                    daof = new MySQLDAOFactory();
                     pedao = daof.getPedidoDAO();
                     pldao = daof.getLineaPedidoDAO();
-                    idPedido = pedido.getIdPedido();
 
-                    
-                        if (cantidadProductoEnCarrito == 0) {
-                            pldao.eliminarLinea(idPedido, idProducto);
+                    if (cantidadProductoEnCarrito == 0) {
+                        if (pedido.getIdPedido() != null){
+                            pldao.eliminarLinea(pedido.getIdPedido(), idProducto);
+                            if (productosEnCarrito == 0) pedao.eliminarPedido(pedido.getIdPedido());
+                        }
+                    } else {
+                        if (productosEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
+                            pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
+                        }
+                        if (cantidadProductoEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
+                            pldao.insertarLinea(pedido.getIdPedido(), cantidadProductoEnCarrito, idProducto);
                         } else {
-                            if (productosEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
-                                pedido.setIdPedido(pedao.crearPedido(usuario.getIdUsuario()));
-                            }
-                            if (cantidadProductoEnCarrito == 1 && accionesACarritoArr[1].equals("anadirACarrito")) {
-                                pldao.insertarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
-                            } else {
-                                pldao.actualizarLinea(idPedido, cantidadProductoEnCarrito, idProducto);
-                            }
-                        
+                            pldao.actualizarLinea(pedido.getIdPedido(), cantidadProductoEnCarrito, idProducto);
+                        }
+
                     }
 
                 } else {
@@ -236,7 +242,7 @@ public class Ajax extends HttpServlet {
                     pedido = new Pedido();
                     pedido.setListadoLineasPedido(new ArrayList());
                 }
-                
+
                 objeto = new JSONObject();
                 objeto.put("cantidadProductoEnCarrito",
                         Utilities.productoEnCarrito(
@@ -249,7 +255,6 @@ public class Ajax extends HttpServlet {
                 break;
             case "carritoFactura":
                 pedido = (Pedido) request.getSession().getAttribute("carrito");
-                
 
                 precioTotalSinIVA = Utilities.sumPreciosCarrito(pedido.getListadoLineasPedido());
                 precioTotalConIVA = precioTotalSinIVA * 1.21f;
@@ -278,8 +283,65 @@ public class Ajax extends HttpServlet {
                 response.setContentType("application/text");
                 response.getWriter().print(objeto);
                 break;
-            case "2":
+            case "pedidosPorFecha":
+                g = new Gson();
+                fechaPedido = g.fromJson(request.getParameter("arreglo"), Date.class);
 
+                usuario = (Usuario) request.getSession().getAttribute("usuarioEnSesion");
+                daof = new MySQLDAOFactory();
+                pedao = daof.getPedidoDAO();
+
+                listadoPedidos = pedao.getPedidosDeFechaYUsuario(usuario.getIdUsuario(), fechaPedido);
+                iteratorPedido = listadoPedidos.iterator();
+                arrayJSON = new JSONArray();
+                while (iteratorPedido.hasNext()) {
+                    pedido = iteratorPedido.next();
+                    objeto = new JSONObject();
+
+                    objeto.put("idPedido", pedido.getIdPedido());
+                    objeto.put("importe", pedido.getImporte());
+                    objeto.put("iva", pedido.getIva());
+
+                    arrayJSON.add(objeto);
+                }
+
+                objeto = new JSONObject();
+                objeto.put("listadoPedido", arrayJSON);
+
+                // mandamos el objeto
+                response.setContentType("application/text");
+                response.getWriter().print(objeto);
+                break;
+            case "detallesPedidoFinalizado":
+                g = new Gson();
+                idPedido = g.fromJson(request.getParameter("arreglo"), Short.class);
+                
+                daof = new MySQLDAOFactory();
+                pedao = daof.getPedidoDAO();
+                
+                pedido = pedao.getPedidoFinalizadoPorId(idPedido);
+                
+                arrayJSON = new JSONArray();
+                iteratorLineaPedido = pedido.getListadoLineasPedido().iterator();
+                
+                while (iteratorLineaPedido.hasNext()) {
+                    lineaPedido = iteratorLineaPedido.next();
+                    objeto = new JSONObject();
+                    
+                    objeto.put("nombre", lineaPedido.getProducto().getNombre());
+                    objeto.put("precio", lineaPedido.getProducto().getPrecio());
+                    objeto.put("imagen", lineaPedido.getProducto().getImagen());
+                    objeto.put("cantidad", lineaPedido.getCantidad());
+                    
+                    arrayJSON.add(objeto);
+                }
+                
+                objeto = new JSONObject();
+                objeto.put("listadoProductosPedido", arrayJSON);
+
+                // mandamos el objeto
+                response.setContentType("application/text");
+                response.getWriter().print(objeto);
                 break;
         }
     }

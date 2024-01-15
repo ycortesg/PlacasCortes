@@ -62,6 +62,7 @@ public class FrontController extends HttpServlet {
         String urlDispatcher = null;
         String opcion = request.getParameter("opcion");
         List<Producto> listadoProducto = null;
+        List<String> listadoFechasPedido = null;
         Usuario usuario = null;
         Pedido pedido = null;
         Boolean actualizado = null;
@@ -106,7 +107,7 @@ public class FrontController extends HttpServlet {
                         }
                     } catch (IllegalAccessException | InvocationTargetException ex) {
                         Utilities.enviarAvisoRequest(request,
-                                "Ha ocurrido algun error al inetar iniciar sesion",
+                                "Ha ocurrido algun error al intentar iniciar sesion",
                                 true);
                         Logger.getLogger(FrontController.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -125,9 +126,13 @@ public class FrontController extends HttpServlet {
                 if (usuario != null) {
                     daof = new MySQLDAOFactory();
                     udao = daof.getUsuarioDAO();
+                    pedao = daof.getPedidoDAO();
 
                     usuario = udao.anadirDetallesAUsuario(usuario);
+                    listadoFechasPedido = pedao.getFechasPedidos(usuario.getIdUsuario());
                     request.getSession().setAttribute("usuarioEnSesion", usuario);
+                    request.getSession().setAttribute("fechasPedidos", listadoFechasPedido);
+                    
 
                     urlDispatcher = "JSP/menuUsuario.jsp";
                 } else {

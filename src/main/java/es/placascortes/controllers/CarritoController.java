@@ -4,15 +4,18 @@
  */
 package es.placascortes.controllers;
 
+import es.placascortes.DAO.ILineaPedidoDAO;
 import es.placascortes.DAO.IPedidoDAO;
 import es.placascortes.DAOFactory.DAOFactory;
 import es.placascortes.DAOFactory.MySQLDAOFactory;
+import es.placascortes.beans.LineaPedido;
 import es.placascortes.beans.Pedido;
 import es.placascortes.beans.Usuario;
 import es.placascortes.utilities.Utilities;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -60,16 +63,16 @@ public class CarritoController extends HttpServlet {
         String opcion = request.getParameter("opcion");
         Pedido pedido = null;
         Usuario usuario = null;
+        LineaPedido lineaPedido = null;
+        Iterator<LineaPedido> iteratorLineaPedido = null;
         DAOFactory daof = null;
         IPedidoDAO pedao = null;
+        ILineaPedidoDAO pldao = null;
         HttpSession sesion = null;
         
         switch (opcion) {
             case "registrate":
                 urlDispatcher = "JSP/registro.jsp";
-                break;
-            case "volver":
-                urlDispatcher = "index.jsp";
                 break;
             case "finalizarCompra":
                 sesion = request.getSession();
@@ -87,9 +90,10 @@ public class CarritoController extends HttpServlet {
                         pedido.setFecha(new Date());
                         
                         pedao.finalizarPedido(pedido);
-                        sesion.removeAttribute("carrito");
+                        
+                        Utilities.eliminarCarrito(sesion);
                         Utilities.enviarAvisoRequest(request, 
-                                "Has realizado la compra por in valor de "+String.format("%.2f", pedido.getImporte())+" € mas IVA", 
+                                "Has realizado la compra por in valor de "+String.format("%.2f", pedido.getImporte())+" € + IVA", 
                                 false);
                         
                     } catch (IllegalAccessException | InvocationTargetException ex) {
@@ -105,6 +109,46 @@ public class CarritoController extends HttpServlet {
                                 true);
                     urlDispatcher = "JSP/carrito.jsp";
                 }
+                break;
+            case "eliminarCarrito":
+                sesion = request.getSession();
+                urlDispatcher = "index.jsp";
+                if (Utilities.carritoEstaEnSesion(sesion)){
+                    if (Utilities.usuarioEstaEnSesion(sesion)) {
+                        daof = new MySQLDAOFactory();
+                        pldao = daof.getLineaPedidoDAO();
+                        pedao = daof.getPedidoDAO();
+                        
+                        pedido = (Pedido) sesion.getAttribute("carrito");
+                        iteratorLineaPedido = pedido.getListadoLineasPedido().iterator();
+                        while (iteratorLineaPedido.hasNext()) {
+                            lineaPedido = iteratorLineaPedido.next();
+                            pldao.eliminarLinea(pedido.getIdPedido(), lineaPedido.getProducto().getIdProducto());
+                        }
+                        
+                        pedao.eliminarPedido(pedido.getIdPedido());
+                    }else{
+                        Utilities.eliminarCookie(response);
+                    }
+                    Utilities.eliminarCarrito(sesion);
+                    Utilities.enviarAvisoRequest(request, 
+                                "Se ha eliminado el carrito correctamente", 
+                                false);
+                }else{
+                    Utilities.leerCoockie(sesion, request);
+                    if (Utilities.carritoEstaEnSesion(sesion)){
+                        Utilities.enviarAvisoRequest(request, 
+                                "Se ha eliminado el carrito correctamente", 
+                                false);
+                    }else{
+                        Utilities.enviarAvisoRequest(request, 
+                                    "No hay ningun carrito que eliminar", 
+                                    true);
+                    }
+                }
+                break;
+            case "volver":
+                urlDispatcher = "index.jsp";
                 break;
         }
         request.getRequestDispatcher(urlDispatcher).forward(request, response);

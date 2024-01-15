@@ -82,30 +82,33 @@ document.querySelectorAll("section")
                         });
                     });
         });
+        
+if (botonFacturaModal){
+    botonFacturaModal.addEventListener("click", () => {
+        if (!botonFacturaModal.disabled) {
+            let request = new XMLHttpRequest();
 
-botonFacturaModal.addEventListener("click", () => {
-    if (!botonFacturaModal.disabled) {
-        let request = new XMLHttpRequest();
+            request.open('POST', url, true);
+            request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        request.open('POST', url, true);
-        request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            request.onreadystatechange = (e) => {
+                if (request.readyState === 4 && request.status === 200) {
+                    let respuesta = JSON.parse(e.currentTarget.responseText);
 
-        request.onreadystatechange = (e) => {
-            if (request.readyState === 4 && request.status === 200) {
-                let respuesta = JSON.parse(e.currentTarget.responseText);
+                    botonFinalizarCompra.type = "button";
+                    botonFinalizarCompra.innerText = "Finalizar compra";
+                    limpiarTabla();
+                    respuesta.listadoCarrito.forEach((e, indx) => {
+                        anadirProductoFactura(e.nombre, e.precio, e.cantidad, indx);
+                    });
+                    anadirInfoDeFactura(respuesta.precioTotalSinIVA, respuesta.diferenciaDeIVA, respuesta.precioTotalConIVA);
+                }
+            };
+            request.send(`accion=carritoFactura`);
+        }
+    });
+}
 
-                botonFinalizarCompra.type = "button";
-                botonFinalizarCompra.innerText = "Finalizar compra";
-                limpiarTabla();
-                respuesta.listadoCarrito.forEach((e, indx) => {
-                    anadirProductoFactura(e.nombre, e.precio, e.cantidad, indx);
-                });
-                anadirInfoDeFactura(respuesta.precioTotalSinIVA, respuesta.diferenciaDeIVA, respuesta.precioTotalConIVA);
-            }
-        };
-        request.send(`accion=carritoFactura`);
-    }
-});
 
 botonFinalizarCompra.addEventListener("click", () => {
     botonFinalizarCompra.innerText = "Confirmar";
